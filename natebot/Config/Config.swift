@@ -123,8 +123,21 @@ class ConfigLoader {
             if let data = try? Data(contentsOf: url) {
                 do {
                     return try JSONDecoder().decode(Config.self, from: data)
+                } catch let decErr as DecodingError {
+                    switch decErr {
+                    case .keyNotFound(let key, let ctx):
+                        throw ConfigError.invalid("Missing key '\(key.stringValue)' in \(path) — \(ctx.debugDescription)")
+                    case .valueNotFound(let type, let ctx):
+                        throw ConfigError.invalid("Null value for required field (\(type)) in \(path) — \(ctx.debugDescription)")
+                    case .typeMismatch(let type, let ctx):
+                        throw ConfigError.invalid("Type mismatch (\(type)) in \(path) — \(ctx.debugDescription)")
+                    case .dataCorrupted(let ctx):
+                        throw ConfigError.invalid("Corrupt JSON in \(path) — \(ctx.debugDescription)")
+                    @unknown default:
+                        throw ConfigError.invalid("Unknown decode error in \(path): \(decErr)")
+                    }
                 } catch {
-                    throw ConfigError.invalid("Parse error in \(path): \(error.localizedDescription)")
+                    throw ConfigError.invalid("Parse error in \(path): \(error)")
                 }
             }
         }
