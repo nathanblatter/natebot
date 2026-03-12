@@ -1,0 +1,54 @@
+{
+  "trusted_sender": "you@icloud.com",
+  "passphrase": "yourpassphrase",
+  "claude_api_key": "sk-ant-...",
+  "briefing": {
+    "time": "07:00",
+    "include_overdue": true,
+    "upcoming_days": 7
+  },
+  "log": {
+    "max_entries": 500
+  },
+  "apps": [
+    {
+      "name": "survivorapp",
+      "display_name": "Survivor Draft League",
+      "health_url": "http://localhost:3001/health",
+      "stats_url": "http://localhost:3001/stats"
+    },
+    {
+      "name": "therapist",
+      "display_name": "AI Therapist",
+      "health_url": "http://localhost:4000/health",
+      "stats_url": "http://localhost:4000/stats"
+    },
+    {
+      "name": "codenames",
+      "display_name": "Codenames",
+      "health_url": "http://localhost:5000/health",
+      "stats_url": null
+    }
+  ],
+  "monitors": [
+    { "type": "app_health", "interval_seconds": 300 },
+    { "type": "docker",     "interval_seconds": 300 },
+    {
+      "type": "system",
+      "interval_seconds": 600,
+      "disk_threshold_percent": 90,
+      "cpu_threshold_percent": 95,
+      "cpu_sustained_minutes": 5
+    }
+  ],
+  "calendars": {
+    "default": "NateBot",
+    "work":    "Work",
+    "school":  "School"
+  },
+  "reminder_lists": {
+    "default": "Inbox",
+    "work":    "Work",
+    "school":  "School"
+  }
+}

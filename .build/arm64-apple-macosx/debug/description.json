@@ -1,0 +1,468 @@
+{
+  "builtTestProducts" : [
+
+  ],
+  "copyCommands" : {
+
+  },
+  "explicitTargetDependencyImportCheckingMode" : {
+    "none" : {
+
+    }
+  },
+  "generatedSourceTargetSet" : [
+
+  ],
+  "pluginDescriptions" : [
+
+  ],
+  "swiftCommands" : {
+    "C.natebot-arm64-apple-macosx15.0-debug.module" : {
+      "executable" : "/Library/Developer/CommandLineTools/usr/bin/swiftc",
+      "fileList" : "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/sources",
+      "importPath" : "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/natebot/Actions/CalendarAction.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/natebot/Actions/ReminderAction.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/natebot/Actions/ReplyAction.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/natebot/Actions/StatusAction.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/natebot/Actions/SystemAction.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/natebot/Claude/ClaudeAPI.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/natebot/Config/Config.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/natebot/Log/ActivityLog.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/natebot/Router/CommandRouter.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/natebot/Router/NLPRouter.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/natebot/Scheduler/MorningBriefing.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/natebot/Scheduler/ProactiveMonitor.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/natebot/Watcher/MessageWatcher.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/natebot/main.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/swift-version--1AB21518FC5DEDBE.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/sources"
+        }
+      ],
+      "isLibrary" : false,
+      "moduleName" : "natebot",
+      "moduleOutputPath" : "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/Modules/natebot.swiftmodule",
+      "objects" : [
+        "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/CalendarAction.swift.o",
+        "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/ReminderAction.swift.o",
+        "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/ReplyAction.swift.o",
+        "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/StatusAction.swift.o",
+        "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/SystemAction.swift.o",
+        "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/ClaudeAPI.swift.o",
+        "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/Config.swift.o",
+        "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/ActivityLog.swift.o",
+        "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/CommandRouter.swift.o",
+        "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/NLPRouter.swift.o",
+        "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/MorningBriefing.swift.o",
+        "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/ProactiveMonitor.swift.o",
+        "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/MessageWatcher.swift.o",
+        "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/main.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "arm64-apple-macosx14.0",
+        "-enable-batch-mode",
+        "-index-store-path",
+        "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/index/store",
+        "-Onone",
+        "-enable-testing",
+        "-j12",
+        "-DSWIFT_PACKAGE",
+        "-DDEBUG",
+        "-module-cache-path",
+        "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/ModuleCache",
+        "-parseable-output",
+        "-Xfrontend",
+        "-entry-point-function-name",
+        "-Xfrontend",
+        "natebot_main",
+        "-swift-version",
+        "5",
+        "-F",
+        "/Library/Developer/CommandLineTools/Library/Developer/Frameworks",
+        "-sdk",
+        "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g",
+        "-package-name",
+        "natebot"
+      ],
+      "outputFileMapPath" : "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/CalendarAction.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/ReminderAction.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/ReplyAction.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/StatusAction.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/SystemAction.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/ClaudeAPI.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/Config.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/ActivityLog.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/CommandRouter.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/NLPRouter.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/MorningBriefing.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/ProactiveMonitor.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/MessageWatcher.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/main.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/Modules/natebot.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/nathanblatter/Desktop/natebot/natebot/Actions/CalendarAction.swift",
+        "/Users/nathanblatter/Desktop/natebot/natebot/Actions/ReminderAction.swift",
+        "/Users/nathanblatter/Desktop/natebot/natebot/Actions/ReplyAction.swift",
+        "/Users/nathanblatter/Desktop/natebot/natebot/Actions/StatusAction.swift",
+        "/Users/nathanblatter/Desktop/natebot/natebot/Actions/SystemAction.swift",
+        "/Users/nathanblatter/Desktop/natebot/natebot/Claude/ClaudeAPI.swift",
+        "/Users/nathanblatter/Desktop/natebot/natebot/Config/Config.swift",
+        "/Users/nathanblatter/Desktop/natebot/natebot/Log/ActivityLog.swift",
+        "/Users/nathanblatter/Desktop/natebot/natebot/Router/CommandRouter.swift",
+        "/Users/nathanblatter/Desktop/natebot/natebot/Router/NLPRouter.swift",
+        "/Users/nathanblatter/Desktop/natebot/natebot/Scheduler/MorningBriefing.swift",
+        "/Users/nathanblatter/Desktop/natebot/natebot/Scheduler/ProactiveMonitor.swift",
+        "/Users/nathanblatter/Desktop/natebot/natebot/Watcher/MessageWatcher.swift",
+        "/Users/nathanblatter/Desktop/natebot/natebot/main.swift"
+      ],
+      "tempsPath" : "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build",
+      "wholeModuleOptimization" : false
+    }
+  },
+  "swiftFrontendCommands" : {
+
+  },
+  "swiftTargetScanArgs" : {
+    "natebot" : [
+      "/Library/Developer/CommandLineTools/usr/bin/swiftc",
+      "-module-name",
+      "natebot",
+      "-package-name",
+      "natebot",
+      "-incremental",
+      "-c",
+      "/Users/nathanblatter/Desktop/natebot/natebot/Actions/CalendarAction.swift",
+      "/Users/nathanblatter/Desktop/natebot/natebot/Actions/ReminderAction.swift",
+      "/Users/nathanblatter/Desktop/natebot/natebot/Actions/ReplyAction.swift",
+      "/Users/nathanblatter/Desktop/natebot/natebot/Actions/StatusAction.swift",
+      "/Users/nathanblatter/Desktop/natebot/natebot/Actions/SystemAction.swift",
+      "/Users/nathanblatter/Desktop/natebot/natebot/Claude/ClaudeAPI.swift",
+      "/Users/nathanblatter/Desktop/natebot/natebot/Config/Config.swift",
+      "/Users/nathanblatter/Desktop/natebot/natebot/Log/ActivityLog.swift",
+      "/Users/nathanblatter/Desktop/natebot/natebot/Router/CommandRouter.swift",
+      "/Users/nathanblatter/Desktop/natebot/natebot/Router/NLPRouter.swift",
+      "/Users/nathanblatter/Desktop/natebot/natebot/Scheduler/MorningBriefing.swift",
+      "/Users/nathanblatter/Desktop/natebot/natebot/Scheduler/ProactiveMonitor.swift",
+      "/Users/nathanblatter/Desktop/natebot/natebot/Watcher/MessageWatcher.swift",
+      "/Users/nathanblatter/Desktop/natebot/natebot/main.swift",
+      "-I",
+      "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/Modules",
+      "-target",
+      "arm64-apple-macosx14.0",
+      "-enable-batch-mode",
+      "-index-store-path",
+      "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/index/store",
+      "-Onone",
+      "-enable-testing",
+      "-j12",
+      "-DSWIFT_PACKAGE",
+      "-DDEBUG",
+      "-module-cache-path",
+      "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/ModuleCache",
+      "-parseable-output",
+      "-Xfrontend",
+      "-entry-point-function-name",
+      "-Xfrontend",
+      "natebot_main",
+      "-swift-version",
+      "5",
+      "-F",
+      "/Library/Developer/CommandLineTools/Library/Developer/Frameworks",
+      "-sdk",
+      "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-package-name",
+      "natebot",
+      "-driver-use-frontend-path",
+      "/Library/Developer/CommandLineTools/usr/bin/swiftc"
+    ]
+  },
+  "targetDependencyMap" : {
+    "natebot" : [
+
+    ]
+  },
+  "testDiscoveryCommands" : {
+
+  },
+  "testEntryPointCommands" : {
+
+  },
+  "writeCommands" : {
+    "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot-entitlement.plist" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<entitlement-plist>"
+        },
+        {
+          "kind" : "virtual",
+          "name" : "<com.apple.security.get-task-allow>"
+        }
+      ],
+      "outputFilePath" : "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot-entitlement.plist"
+    },
+    "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/natebot/Actions/CalendarAction.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/natebot/Actions/ReminderAction.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/natebot/Actions/ReplyAction.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/natebot/Actions/StatusAction.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/natebot/Actions/SystemAction.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/natebot/Claude/ClaudeAPI.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/natebot/Config/Config.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/natebot/Log/ActivityLog.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/natebot/Router/CommandRouter.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/natebot/Router/NLPRouter.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/natebot/Scheduler/MorningBriefing.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/natebot/Scheduler/ProactiveMonitor.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/natebot/Watcher/MessageWatcher.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/natebot/main.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/sources"
+    },
+    "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.product/Objects.LinkFileList" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<link-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/ActivityLog.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/CalendarAction.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/ClaudeAPI.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/CommandRouter.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/Config.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/MessageWatcher.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/MorningBriefing.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/NLPRouter.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/ProactiveMonitor.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/ReminderAction.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/ReplyAction.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/StatusAction.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/SystemAction.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/main.swift.o"
+        }
+      ],
+      "outputFilePath" : "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.product/Objects.LinkFileList"
+    },
+    "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/swift-version--1AB21518FC5DEDBE.txt" : {
+      "alwaysOutOfDate" : true,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<swift-get-version>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Library/Developer/CommandLineTools/usr/bin/swiftc"
+        }
+      ],
+      "outputFilePath" : "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/swift-version--1AB21518FC5DEDBE.txt"
+    }
+  }
+}

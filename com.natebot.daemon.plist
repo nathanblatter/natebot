@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Unique label for launchd -->
+    <key>Label</key>
+    <string>com.natebot.daemon</string>
+
+    <!-- Path to the compiled NateBot binary -->
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/local/bin/natebot</string>
+    </array>
+
+    <!-- Auto-start on login -->
+    <key>RunAtLoad</key>
+    <true/>
+
+    <!-- Restart automatically if it crashes -->
+    <key>KeepAlive</key>
+    <true/>
+
+    <!-- Working directory (where natebot.json is looked up relative to) -->
+    <key>WorkingDirectory</key>
+    <string>/usr/local/bin</string>
+
+    <!-- Log stdout / stderr to files for debugging -->
+    <key>StandardOutPath</key>
+    <string>/tmp/natebot.stdout.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/tmp/natebot.stderr.log</string>
+
+    <!-- Throttle restarts: wait 10 seconds before relaunching after a crash -->
+    <key>ThrottleInterval</key>
+    <integer>10</integer>
+</dict>
+</plist>
