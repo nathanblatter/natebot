@@ -9,6 +9,8 @@ class MorningBriefing {
     private let reply: ReplyAction
     private let log: ActivityLog
     private var scheduledTimer: Timer?
+    var locationTracker: LocationTracker?
+    var finforgeAction: FinForgeAction?
 
     init(config: Config, store: EKEventStore, reply: ReplyAction, log: ActivityLog) {
         self.config = config
@@ -34,14 +36,62 @@ class MorningBriefing {
         }
     }
 
+    // MARK: - Schedule evening briefing
+
+    func scheduleEveningBriefing() {
+        guard let eveningTime = config.briefing.eveningTime else { return }
+        guard let fireDate = nextFireDate(timeString: eveningTime) else {
+            print("[MorningBriefing] Could not parse evening time: \(eveningTime)")
+            return
+        }
+
+        let delay = fireDate.timeIntervalSinceNow
+        print("[MorningBriefing] Next evening briefing in \(Int(delay / 60)) minutes.")
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
+            self?.sendEveningBriefing()
+            self?.scheduleEveningBriefing()
+        }
+    }
+
     // MARK: - Send briefing (public, also used by /briefing command)
 
     func send() {
         buildBriefing { [weak self] text in
             guard let self = self else { return }
-            self.reply.send(text)
-            self.log.append(from: "system", message: "morning_briefing",
-                            action: "briefing", result: "sent", reply: "Briefing sent")
+            if let finforge = self.finforgeAction {
+                finforge.briefing { financeBrief in
+                    let fullBriefing = text + "\n\n" + financeBrief
+                    self.reply.send(fullBriefing)
+                    self.log.append(from: "system", message: "morning_briefing",
+                                    action: "briefing", result: "sent", reply: "Briefing sent (with finance)")
+                }
+            } else {
+                self.reply.send(text)
+                self.log.append(from: "system", message: "morning_briefing",
+                                action: "briefing", result: "sent", reply: "Briefing sent")
+            }
+        }
+    }
+
+    /// Send evening briefing — includes location summary.
+    func sendEveningBriefing() {
+        buildBriefing { [weak self] text in
+            guard let self = self else { return }
+            var fullText = text.replacingOccurrences(
+                of: "☀️ Good morning",
+                with: "🌙 Good evening"
+            )
+
+            // Append location summary if tracker is available
+            if let tracker = self.locationTracker {
+                let summary = tracker.generateSummary()
+                fullText += "\n\n📍 LOCATION SUMMARY\n\(summary)"
+            }
+
+            self.reply.send(fullText)
+            self.log.append(from: "system", message: "evening_briefing",
+                            action: "evening_briefing", result: "sent", reply: "Evening briefing sent")
         }
     }
 
@@ -194,7 +244,11 @@ class MorningBriefing {
     // MARK: - Helpers
 
     private func nextFireDate() -> Date? {
-        let parts = config.briefing.time.components(separatedBy: ":")
+        nextFireDate(timeString: config.briefing.time)
+    }
+
+    private func nextFireDate(timeString: String) -> Date? {
+        let parts = timeString.components(separatedBy: ":")
         guard parts.count == 2,
               let hour = Int(parts[0]),
               let minute = Int(parts[1]) else { return nil }

@@ -10,6 +10,7 @@ class ProactiveMonitor {
     private let systemAction: SystemAction
     private let reply: ReplyAction
     private let log: ActivityLog
+    var finforgeAction: FinForgeAction?
 
     // Snooze: suppress all proactive alerts until this time
     private(set) var snoozeUntil: Date = .distantPast
@@ -49,6 +50,10 @@ class ProactiveMonitor {
                 schedule(interval: interval) { [weak self] in self?.runDockerCheck() }
             case "system":
                 schedule(interval: interval) { [weak self] in self?.runSystemCheck(cfg: monitorConfig) }
+            case "finforge_poll":
+                schedule(interval: interval) { [weak self] in
+                    self?.finforgeAction?.pollPending { }
+                }
             default:
                 print("[ProactiveMonitor] Unknown monitor type: \(monitorConfig.type)")
             }

@@ -1,0 +1,59 @@
+{
+  "trusted_sender": "you@icloud.com",
+  "passphrase": "your-passphrase",
+  "claude_api_key": "sk-ant-...",
+  "briefing": {
+    "time": "07:00",
+    "evening_time": "21:00",
+    "include_overdue": true,
+    "upcoming_days": 7
+  },
+  "log": {
+    "max_entries": 500
+  },
+  "apps": [
+    {
+      "name": "myapp",
+      "display_name": "My App",
+      "health_url": "http://localhost:3000/health",
+      "stats_url": null
+    }
+  ],
+  "monitors": [
+    { "type": "app_health", "interval_seconds": 300 },
+    { "type": "docker", "interval_seconds": 300 },
+    {
+      "type": "system",
+      "interval_seconds": 600,
+      "disk_threshold_percent": 90,
+      "cpu_threshold_percent": 95,
+      "cpu_sustained_minutes": 5
+    }
+  ],
+  "calendars": {
+    "default": "Home",
+    "work": "Work",
+    "school": "School"
+  },
+  "reminder_lists": {
+    "default": "Inbox",
+    "work": "Work",
+    "school": "School"
+  },
+  "goal_tracking": {
+    "enabled": true,
+    "weekly_summary_day": 0,
+    "weekly_summary_time": "14:00"
+  },
+  "location_tracking": {
+    "enabled": false,
+    "device": "iPhone",
+    "named_locations": {}
+  },
+  "finforge": {
+    "enabled": false,
+    "api_url": "http://localhost:8001/api/v1",
+    "api_key": "",
+    "poll_interval_seconds": 60
+  }
+}

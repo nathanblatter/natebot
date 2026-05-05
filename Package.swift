@@ -6,16 +6,22 @@ let package = Package(
     platforms: [
         .macOS(.v14)
     ],
+    dependencies: [
+        .package(url: "https://github.com/apple/swift-nio.git", from: "2.65.0"),
+    ],
     targets: [
         .executableTarget(
             name: "natebot",
+            dependencies: [
+                .product(name: "NIO", package: "swift-nio"),
+                .product(name: "NIOHTTP1", package: "swift-nio"),
+            ],
             path: "natebot",
             exclude: ["Resources"],
             resources: [
-                .copy("Resources/natebot.json")
+                .copy("Resources/natebot.example.json")
             ],
             linkerSettings: [
-                // Link system SQLite3 (no third-party packages needed)
                 .linkedLibrary("sqlite3")
             ]
         )

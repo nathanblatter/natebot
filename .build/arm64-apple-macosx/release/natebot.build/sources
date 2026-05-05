@@ -5,6 +5,9 @@
 /Users/nathanblatter/Desktop/natebot/natebot/Actions/SystemAction.swift
 /Users/nathanblatter/Desktop/natebot/natebot/Claude/ClaudeAPI.swift
 /Users/nathanblatter/Desktop/natebot/natebot/Config/Config.swift
+/Users/nathanblatter/Desktop/natebot/natebot/Goals/GoalAction.swift
+/Users/nathanblatter/Desktop/natebot/natebot/Goals/GoalReminder.swift
+/Users/nathanblatter/Desktop/natebot/natebot/Goals/GoalStore.swift
 /Users/nathanblatter/Desktop/natebot/natebot/Log/ActivityLog.swift
 /Users/nathanblatter/Desktop/natebot/natebot/Router/CommandRouter.swift
 /Users/nathanblatter/Desktop/natebot/natebot/Router/NLPRouter.swift

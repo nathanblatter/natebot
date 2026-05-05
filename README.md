@@ -39,7 +39,12 @@ NateBot/
 
 ### 1. Configure `natebot.json`
 
-Edit `natebot/Resources/natebot.json` (or place it at `~/.config/natebot/natebot.json`):
+Copy the example config and fill in your values:
+```bash
+cp natebot/Resources/natebot.example.json ~/.config/natebot/natebot.json
+```
+
+Edit `~/.config/natebot/natebot.json`:
 
 ```json
 {
@@ -80,11 +85,9 @@ Edit `natebot/Resources/natebot.json` (or place it at `~/.config/natebot/natebot
 
 **Or build from command line (Swift Package Manager):**
 ```bash
-cd /Users/nathanblatter/Desktop/natebot
 swift build -c release
 # Binary: .build/release/natebot
 ```
-(Requires `Package.swift` — create one if using SPM.)
 
 ### 3. Grant macOS Permissions
 

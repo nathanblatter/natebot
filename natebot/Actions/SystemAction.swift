@@ -45,7 +45,8 @@ class SystemAction {
     // MARK: - /restart
 
     func restart(appName: String, passphrase: String, configPassphrase: String, completion: @escaping (String) -> Void) {
-        guard passphrase == configPassphrase else {
+        guard passphrase.trimmingCharacters(in: .whitespacesAndNewlines)
+                == configPassphrase.trimmingCharacters(in: .whitespacesAndNewlines) else {
             completion("⛔ Incorrect passphrase.")
             return
         }
@@ -65,6 +66,36 @@ class SystemAction {
                 } else {
                     let err = result.stderr.isEmpty ? "Exit code \(result.exitCode)" : result.stderr
                     completion("⚠️ Restart failed: \(err)")
+                }
+            }
+        }
+    }
+
+    // MARK: - /docker stop
+
+    func dockerStop(containerName: String, passphrase: String, configPassphrase: String, completion: @escaping (String) -> Void) {
+        guard passphrase.trimmingCharacters(in: .whitespacesAndNewlines)
+                == configPassphrase.trimmingCharacters(in: .whitespacesAndNewlines) else {
+            completion("⛔ Incorrect passphrase.")
+            return
+        }
+
+        let dockerPaths = ["/usr/local/bin/docker", "/usr/bin/docker", "/opt/homebrew/bin/docker"]
+        guard let dockerPath = dockerPaths.first(where: { FileManager.default.fileExists(atPath: $0) }) else {
+            completion("⚠️ Docker not found.")
+            return
+        }
+
+        completion("🛑 Stopping \(containerName)...")
+
+        DispatchQueue.global(qos: .utility).async {
+            let result = Self.runProcess(dockerPath, args: ["stop", containerName])
+            DispatchQueue.main.async {
+                if result.exitCode == 0 {
+                    completion("✅ \(containerName) stopped.")
+                } else {
+                    let err = result.stderr.isEmpty ? "Exit code \(result.exitCode)" : result.stderr
+                    completion("⚠️ Stop failed: \(err)")
                 }
             }
         }

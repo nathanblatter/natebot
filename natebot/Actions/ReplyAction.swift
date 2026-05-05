@@ -74,6 +74,19 @@ class ReplyAction {
         /snooze [30m|1h|2h] — Snooze proactive alerts
         /briefing — Morning briefing on demand
 
+        🎯 GOAL TRACKING
+        /goals — Today's status for all goals
+        /goals add [description] — Add a new goal
+        /goals add [description] location:[Place] — Auto-check-in at a location
+        /goals remove [goal name] — Remove a goal
+        /goals log [goal name] — Log a completion
+        /goals history — This week's completion history
+        Or just say "I went for a run" and I'll figure it out!
+
+        📍 LOCATION
+        /location — Current iPhone location
+        /location history — Today's location summary
+
         📋 MISC
         /log — Last 10 activity entries
         /help — This message

@@ -31,9 +31,24 @@ class NLPRouter {
     - status_single  → Check one app.           params: { app_name }
     - sys_health     → System CPU/RAM/Disk.     params: {}
     - docker_status  → Docker container list.   params: {}
+    - docker_stop    → Stop a Docker container. params: { container_name }
     - briefing       → Morning briefing.        params: {}
     - log            → Recent activity log.     params: {}
     - help           → Help message.            params: {}
+    - goal_checkin   → User is reporting they completed a personal goal (e.g. "I prayed this morning", "finished my run").
+                       params: { goal_name (string matching one of their goals, e.g. "morning prayer", "run"),
+                                 note? (any extra context, e.g. "for 20 mins") }
+    - goal_add       → User wants to add a new personal goal.
+                       params: { name (string, title-cased, 2-5 words), frequency ("daily"|"weekly"),
+                                 reminder_time? ("HH:MM" 24h format, include only if user mentions a time) }
+    - finforge_briefing  → user wants a financial summary, asks about money/finances/net worth.   params: {}
+    - finforge_portfolio → user asks about stocks, holdings, portfolio, investments.              params: {}
+    - finforge_predict   → user asks about risk or prediction for a specific ticker.
+                           params: { symbol (e.g. "AAPL") }
+    - finforge_goals     → user asks about financial goals, savings progress.                    params: {}
+    - finforge_watchlist → user asks about watchlist, stock prices they're tracking.              params: {}
+    - finforge_chat      → user asks any other finance question that needs detailed analysis.
+                           params: { message (the original question) }
     - unknown        → Cannot determine.        params: { reason }
 
     Rules:

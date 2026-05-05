@@ -43,7 +43,7 @@ class ReminderAction {
                     completion("⚠️ Could not parse reminder. Try: /remind call mom tomorrow")
                     return
                 }
-                self.createEKReminder(reminder, completion: completion)
+                completion(self.createEKReminder(reminder))
             }
         }
     }
@@ -79,28 +79,79 @@ class ReminderAction {
                 var created = 0
                 var failed  = 0
                 var listsUsed = Set<String>()
-                let group = DispatchGroup()
 
                 for reminder in reminders {
-                    group.enter()
-                    self.createEKReminder(reminder) { msg in
-                        if msg.hasPrefix("✅") {
-                            created += 1
-                            listsUsed.insert(reminder.list)
-                        } else {
-                            failed += 1
-                        }
-                        group.leave()
+                    let msg = self.createEKReminder(reminder)
+                    if msg.hasPrefix("✅") {
+                        created += 1
+                        listsUsed.insert(reminder.list)
+                    } else {
+                        failed += 1
                     }
                 }
 
-                group.notify(queue: .main) {
-                    let lists = listsUsed.sorted().joined(separator: ", ")
-                    var reply = "📋 Created \(created) reminder\(created == 1 ? "" : "s") across \(lists.isEmpty ? "default" : lists)."
-                    if failed > 0 { reply += " (\(failed) failed)" }
-                    completion(reply)
-                }
+                let lists = listsUsed.sorted().joined(separator: ", ")
+                var reply = "📋 Created \(created) reminder\(created == 1 ? "" : "s") across \(lists.isEmpty ? "default" : lists)."
+                if failed > 0 { reply += " (\(failed) failed)" }
+                completion(reply)
             }
+        }
+    }
+
+    // MARK: - List Reminders
+
+    func listReminders(completion: @escaping ([[String: Any]]) -> Void) {
+        let pred = store.predicateForIncompleteReminders(withDueDateStarting: nil, ending: nil, calendars: nil)
+        store.fetchReminders(matching: pred) { reminders in
+            let df = ISO8601DateFormatter()
+            let result: [[String: Any]] = (reminders ?? []).map { r in
+                var d: [String: Any] = [
+                    "id": r.calendarItemIdentifier,
+                    "title": r.title ?? "Untitled",
+                    "list": r.calendar?.title ?? "",
+                    "priority": ReminderAction.priorityString(r.priority)
+                ]
+                if let due = r.dueDateComponents?.date {
+                    d["dueDate"] = df.string(from: due)
+                }
+                return d
+            }.sorted { a, b in
+                let da = a["dueDate"] as? String ?? ""
+                let db = b["dueDate"] as? String ?? ""
+                return da < db
+            }
+            completion(result)
+        }
+    }
+
+    // MARK: - Complete Reminder
+
+    func completeReminder(reminderId: String, completion: @escaping (Bool, String) -> Void) {
+        guard let item = store.calendarItem(withIdentifier: reminderId),
+              let reminder = item as? EKReminder else {
+            completion(false, "Reminder not found"); return
+        }
+        reminder.isCompleted = true
+        do {
+            try store.save(reminder, commit: true)
+            completion(true, "Completed")
+        } catch {
+            completion(false, error.localizedDescription)
+        }
+    }
+
+    // MARK: - Delete Reminder
+
+    func deleteReminder(reminderId: String, completion: @escaping (Bool, String) -> Void) {
+        guard let item = store.calendarItem(withIdentifier: reminderId),
+              let reminder = item as? EKReminder else {
+            completion(false, "Reminder not found"); return
+        }
+        do {
+            try store.remove(reminder, commit: true)
+            completion(true, "Deleted")
+        } catch {
+            completion(false, error.localizedDescription)
         }
     }
 
@@ -153,6 +204,15 @@ class ReminderAction {
         }
     }
 
+    private static func priorityString(_ priority: Int) -> String {
+        switch EKReminderPriority(rawValue: UInt(priority)) {
+        case .high:   return "high"
+        case .medium: return "medium"
+        case .low:    return "low"
+        default:      return "none"
+        }
+    }
+
     private func parsePriority(_ s: String) -> EKReminderPriority {
         switch s.lowercased() {
         case "high":   return .high
@@ -164,8 +224,8 @@ class ReminderAction {
 
     // MARK: - Private: EventKit
 
-    private func createEKReminder(_ reminder: ReminderData, completion: @escaping (String) -> Void) {
-        // Resolve list name
+    @discardableResult
+    private func createEKReminder(_ reminder: ReminderData) -> String {
         let listName: String
         switch reminder.list {
         case "work":   listName = config.reminderLists.work
@@ -173,14 +233,13 @@ class ReminderAction {
         default:       listName = config.reminderLists.defaultList
         }
 
-        // Find or use default list
         let ekList: EKCalendar? = store.calendars(for: .reminder)
             .first(where: { $0.title == listName })
+            ?? store.calendars(for: .reminder).first(where: { $0.title == config.reminderLists.defaultList })
             ?? store.defaultCalendarForNewReminders()
 
         guard let ekList = ekList else {
-            completion("⚠️ No reminder list found. Check EventKit access.")
-            return
+            return "⚠️ No reminder list found. Check EventKit access."
         }
 
         let ekReminder = EKReminder(eventStore: store)
@@ -189,10 +248,9 @@ class ReminderAction {
         ekReminder.priority = Int(reminder.priority.rawValue)
 
         if let dueDate = reminder.dueDate {
-            let components = Calendar.current.dateComponents(
+            ekReminder.dueDateComponents = Calendar.current.dateComponents(
                 [.year, .month, .day, .hour, .minute, .second], from: dueDate
             )
-            ekReminder.dueDateComponents = components
         }
 
         do {
@@ -203,9 +261,9 @@ class ReminderAction {
                 df.dateFormat = "MMM d 'at' h:mm a"
                 reply += " — due \(df.string(from: dueDate))"
             }
-            completion(reply)
+            return reply
         } catch {
-            completion("⚠️ Failed to save reminder '\(reminder.title)': \(error.localizedDescription)")
+            return "⚠️ Failed to save reminder '\(reminder.title)': \(error.localizedDescription)"
         }
     }
 }

@@ -18,6 +18,7 @@ enum ParsedCommand {
     // System
     case sysHealth
     case dockerStatus
+    case dockerStop(container: String, passphrase: String)
     case restart(app: String, passphrase: String)
 
     // Scheduler
@@ -27,6 +28,24 @@ enum ParsedCommand {
     // Misc
     case log
     case help
+
+    // Goals
+    case goalsStatus
+    case goalsAdd(String)
+    case goalsRemove(String)
+    case goalsLog(String)
+    case goalsHistory
+
+    // Location
+    case locationCurrent
+    case locationHistory
+
+    // FinForge
+    case financeBriefing
+    case financePortfolio
+    case financePredict(String)
+    case financeGoals
+    case financeWatchlist
 
     // NLP fallback
     case nlpFallback(String)
@@ -97,6 +116,11 @@ class CommandRouter {
 
         // MARK: /docker
         case "/docker":
+            if parts.count >= 2 && parts[1].lowercased() == "stop" {
+                let container = parts.count >= 3 ? parts[2] : ""
+                let pass      = parts.count >= 4 ? parts[3] : ""
+                return .dockerStop(container: container, passphrase: pass)
+            }
             return .dockerStatus
 
         // MARK: /restart
@@ -117,6 +141,49 @@ class CommandRouter {
         // MARK: /log
         case "/log":
             return .log
+
+        // MARK: /goals
+        case "/goals":
+            guard parts.count >= 2 else { return .goalsStatus }
+            let sub  = parts[1].lowercased()
+            let rest = parts.dropFirst(2).joined(separator: " ")
+
+            switch sub {
+            case "add":
+                return .goalsAdd(rest)
+            case "remove", "delete", "rm":
+                return .goalsRemove(rest)
+            case "log", "done", "check":
+                return .goalsLog(rest)
+            case "history":
+                return .goalsHistory
+            default:
+                return .goalsStatus
+            }
+
+        // MARK: /location
+        case "/location":
+            if parts.count >= 2 && parts[1].lowercased() == "history" {
+                return .locationHistory
+            }
+            return .locationCurrent
+
+        // MARK: /finance, /portfolio, /stocks, /predict, /fingoals, /watchlist
+        case "/finance":
+            return .financeBriefing
+
+        case "/portfolio", "/stocks":
+            return .financePortfolio
+
+        case "/predict":
+            let symbol = parts.count >= 2 ? parts[1].uppercased() : "SPY"
+            return .financePredict(symbol)
+
+        case "/fingoals":
+            return .financeGoals
+
+        case "/watchlist":
+            return .financeWatchlist
 
         // MARK: /help
         case "/help":

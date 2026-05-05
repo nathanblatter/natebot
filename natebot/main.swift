@@ -4,15 +4,20 @@
 
 import Foundation
 import EventKit
+import Darwin
+
+// Disable stdout buffering so launchd log files get output immediately
+setbuf(stdout, nil)
 
 // MARK: - Boot
 
 print("[NateBot] Starting up...")
 
-// 1. Load config
-let config: Config
+// 1. Load config + URL
+let configManager: ConfigManager
 do {
-    config = try ConfigLoader.load()
+    let (config, url) = try ConfigLoader.loadWithURL()
+    configManager = ConfigManager(config: config, configURL: url)
     print("[NateBot] Config loaded. Trusted sender: \(config.trustedSender)")
 } catch ConfigError.notFound {
     print("[NateBot] FATAL: natebot.json not found. Place it at ~/.config/natebot/natebot.json or next to the executable.")
@@ -26,9 +31,9 @@ do {
 }
 
 // 2. Initialize shared services
-let log        = ActivityLog(maxEntries: config.log.maxEntries)
-let claude     = ClaudeAPI(apiKey: config.claudeApiKey)
-let replyAction = ReplyAction(trustedSender: config.trustedSender, log: log)
+let log        = ActivityLog(maxEntries: configManager.current.log.maxEntries)
+let claude     = ClaudeAPI(apiKey: configManager.current.claudeApiKey)
+let replyAction = ReplyAction(trustedSender: configManager.current.trustedSender, log: log)
 
 // 3. Request EventKit access (Calendar + Reminders)
 let eventStore = EKEventStore()
@@ -70,25 +75,66 @@ func requestEventKitAccess(completion: @escaping (Bool) -> Void) {
 }
 
 // 4. Action handlers
-let calendarAction = CalendarAction(store: eventStore, config: config, claude: claude)
-let reminderAction = ReminderAction(store: eventStore, config: config, claude: claude)
-let statusAction   = StatusAction(apps: config.apps)
-let systemAction   = SystemAction(config: config, reply: replyAction)
+let calendarAction = CalendarAction(store: eventStore, config: configManager.current, claude: claude)
+let reminderAction = ReminderAction(store: eventStore, config: configManager.current, claude: claude)
+let statusAction   = StatusAction(apps: configManager.current.apps)
+let systemAction   = SystemAction(config: configManager.current, reply: replyAction)
 
-// 5. Routers
+// Goal tracking (optional — enabled via goal_tracking config)
+var goalAction: GoalAction? = nil
+var goalReminder: GoalReminder? = nil
+var sharedGoalStore: GoalStore? = nil
+
+if let trackingConfig = configManager.current.goalTracking, trackingConfig.enabled {
+    let goalStore = GoalStore()
+    sharedGoalStore = goalStore
+    var goalActionBox: GoalAction? = nil
+    let reminder = GoalReminder(
+        config: trackingConfig,
+        store: goalStore,
+        reply: replyAction,
+        log: log,
+        goalActionProvider: { goalActionBox }
+    )
+    let action = GoalAction(store: goalStore, claude: claude, reply: replyAction, reminder: reminder)
+    goalActionBox = action
+    goalAction = action
+    goalReminder = reminder
+}
+
+// 5. Location tracking (optional — enabled via location_tracking config)
+var locationTracker: LocationTracker? = nil
+
+if let locConfig = configManager.current.locationTracking, locConfig.enabled {
+    let scraper = FindMyLocationScraper()
+    locationTracker = LocationTracker(
+        scraper: scraper,
+        device: locConfig.device,
+        namedLocations: locConfig.namedLocations
+    )
+}
+
+// 6. FinForge integration (optional — enabled via finforge config)
+var finforgeAction: FinForgeAction? = nil
+if let fc = configManager.current.finforge, fc.enabled {
+    finforgeAction = FinForgeAction(config: fc, reply: replyAction, log: log)
+    print("[Boot] FinForge integration enabled — polling \(fc.apiUrl)")
+}
+
+// 7. Routers
 let commandRouter  = CommandRouter()
 let nlpRouter      = NLPRouter(claude: claude)
 
-// 6. Proactive monitors + morning briefing
+// 8. Proactive monitors + morning briefing
 let proactiveMonitor = ProactiveMonitor(
-    config: config,
+    config: configManager.current,
     statusAction: statusAction,
     systemAction: systemAction,
     reply: replyAction,
     log: log
 )
 let morningBriefing = MorningBriefing(
-    config: config,
+    config: configManager.current,
     store: eventStore,
     reply: replyAction,
     log: log
@@ -98,6 +144,7 @@ let morningBriefing = MorningBriefing(
 
 /// Dispatches a parsed command to the appropriate action handler.
 func dispatch(_ command: ParsedCommand, rawMessage: String) {
+    let config = configManager.current
     switch command {
 
     // MARK: Calendar
@@ -160,11 +207,18 @@ func dispatch(_ command: ParsedCommand, rawMessage: String) {
                        action: "docker_status", result: "ok", reply: reply)
         }
 
+    case .dockerStop(let container, let passphrase):
+        systemAction.dockerStop(containerName: container, passphrase: passphrase,
+                                configPassphrase: config.passphrase) { reply in
+            replyAction.send(reply)
+            log.append(from: config.trustedSender, message: "/docker stop \(container) [redacted]",
+                       action: "docker_stop", result: reply.hasPrefix("✅") ? "success" : "error", reply: reply)
+        }
+
     case .restart(let appName, let passphrase):
         systemAction.restart(appName: appName, passphrase: passphrase,
                              configPassphrase: config.passphrase) { reply in
             replyAction.send(reply)
-            // Never log the passphrase
             log.append(from: config.trustedSender, message: "/restart \(appName) [redacted]",
                        action: "restart", result: reply.hasPrefix("✅") ? "success" : "error", reply: reply)
         }
@@ -192,6 +246,146 @@ func dispatch(_ command: ParsedCommand, rawMessage: String) {
         log.append(from: config.trustedSender, message: rawMessage,
                    action: "help", result: "ok", reply: "Help sent")
 
+    // MARK: Goals
+    case .goalsStatus:
+        guard let ga = goalAction else {
+            replyAction.send("⚠️ Goal tracking is not enabled.")
+            return
+        }
+        ga.handleStatus { reply in
+            replyAction.send(reply)
+            log.append(from: config.trustedSender, message: rawMessage,
+                       action: "goals_status", result: "ok", reply: reply)
+        }
+
+    case .goalsAdd(let text):
+        guard let ga = goalAction else {
+            replyAction.send("⚠️ Goal tracking is not enabled.")
+            return
+        }
+        ga.handleAdd(rawText: text) { reply in
+            replyAction.send(reply)
+            log.append(from: config.trustedSender, message: rawMessage,
+                       action: "goals_add", result: reply.hasPrefix("✅") ? "success" : "error", reply: reply)
+        }
+
+    case .goalsRemove(let text):
+        guard let ga = goalAction else {
+            replyAction.send("⚠️ Goal tracking is not enabled.")
+            return
+        }
+        ga.handleRemove(rawText: text) { reply in
+            replyAction.send(reply)
+            log.append(from: config.trustedSender, message: rawMessage,
+                       action: "goals_remove", result: reply.hasPrefix("✅") ? "success" : "error", reply: reply)
+        }
+
+    case .goalsLog(let text):
+        guard let ga = goalAction else {
+            replyAction.send("⚠️ Goal tracking is not enabled.")
+            return
+        }
+        ga.handleSlashCheckin(rawText: text) { reply in
+            replyAction.send(reply)
+            log.append(from: config.trustedSender, message: rawMessage,
+                       action: "goals_log", result: reply.hasPrefix("✅") ? "success" : "error", reply: reply)
+        }
+
+    case .goalsHistory:
+        guard let ga = goalAction else {
+            replyAction.send("⚠️ Goal tracking is not enabled.")
+            return
+        }
+        ga.handleHistory { reply in
+            replyAction.send(reply)
+            log.append(from: config.trustedSender, message: rawMessage,
+                       action: "goals_history", result: "ok", reply: reply)
+        }
+
+    // MARK: Location
+    case .locationCurrent:
+        guard let tracker = locationTracker else {
+            replyAction.send("⚠️ Location tracking is not enabled.")
+            return
+        }
+        tracker.scrapeNow { entry in
+            if let e = entry {
+                let label = e.label ?? e.address
+                replyAction.send("📍 \(e.device): \(label)\n\(e.address)\n\(e.timestamp)")
+            } else {
+                replyAction.send("⚠️ Could not get location — Find My may not be running.")
+            }
+        }
+        log.append(from: config.trustedSender, message: rawMessage,
+                   action: "location", result: "ok", reply: "Location sent")
+
+    case .locationHistory:
+        guard let tracker = locationTracker else {
+            replyAction.send("⚠️ Location tracking is not enabled.")
+            return
+        }
+        let summary = tracker.generateSummary()
+        let reply = "📍 Today's Location History:\n\(summary)"
+        replyAction.send(reply)
+        log.append(from: config.trustedSender, message: rawMessage,
+                   action: "location_history", result: "ok", reply: reply)
+
+    // MARK: FinForge
+    case .financeBriefing:
+        guard let ff = finforgeAction else {
+            replyAction.send("⚠️ FinForge integration is not enabled.")
+            return
+        }
+        ff.briefing { reply in
+            replyAction.send(reply)
+            log.append(from: config.trustedSender, message: rawMessage,
+                       action: "finforge_briefing", result: "ok", reply: reply)
+        }
+
+    case .financePortfolio:
+        guard let ff = finforgeAction else {
+            replyAction.send("⚠️ FinForge integration is not enabled.")
+            return
+        }
+        ff.portfolio { reply in
+            replyAction.send(reply)
+            log.append(from: config.trustedSender, message: rawMessage,
+                       action: "finforge_portfolio", result: "ok", reply: reply)
+        }
+
+    case .financePredict(let symbol):
+        guard let ff = finforgeAction else {
+            replyAction.send("⚠️ FinForge integration is not enabled.")
+            return
+        }
+        ff.predict(symbol: symbol) { reply in
+            replyAction.send(reply)
+            log.append(from: config.trustedSender, message: rawMessage,
+                       action: "finforge_predict", result: "ok", reply: reply)
+        }
+
+    case .financeGoals:
+        guard let ff = finforgeAction else {
+            replyAction.send("⚠️ FinForge integration is not enabled.")
+            return
+        }
+        ff.goals { reply in
+            replyAction.send(reply)
+            log.append(from: config.trustedSender, message: rawMessage,
+                       action: "finforge_goals", result: "ok", reply: reply)
+        }
+
+    case .financeWatchlist:
+        guard let ff = finforgeAction else {
+            replyAction.send("⚠️ FinForge integration is not enabled.")
+            return
+        }
+        ff.watchlist { reply in
+            replyAction.send(reply)
+            log.append(from: config.trustedSender, message: rawMessage,
+                       action: "finforge_watchlist", result: "ok", reply: reply)
+        }
+
     // MARK: NLP Fallback
     case .nlpFallback(let text):
         nlpRouter.route(text) { result in
@@ -203,6 +397,7 @@ func dispatch(_ command: ParsedCommand, rawMessage: String) {
 // MARK: - NLP Dispatcher
 
 func dispatchNLP(_ result: NLPResult, rawMessage: String) {
+    let config = configManager.current
     switch result.action {
     case "cal_add":
         let details = buildNLPCalDetails(result.params)
@@ -233,6 +428,13 @@ func dispatchNLP(_ result: NLPResult, rawMessage: String) {
     case "docker_status":
         dispatch(.dockerStatus, rawMessage: rawMessage)
 
+    case "docker_stop":
+        let container = result.params["container_name"] as? String ?? ""
+        let reply = "⚠️ Use /docker stop \(container) <passphrase> to stop this container."
+        replyAction.send(reply)
+        log.append(from: config.trustedSender, message: rawMessage,
+                   action: "nlp_docker_stop", result: "prompt", reply: reply)
+
     case "briefing":
         dispatch(.briefing, rawMessage: rawMessage)
 
@@ -242,13 +444,89 @@ func dispatchNLP(_ result: NLPResult, rawMessage: String) {
     case "help":
         dispatch(.help, rawMessage: rawMessage)
 
+    case "goal_checkin":
+        guard let ga = goalAction else { break }
+        let goalName = result.params["goal_name"] as? String ?? rawMessage
+        let note = result.params["note"] as? String
+        ga.handleCheckin(rawMessage: rawMessage, goalName: goalName, note: note) { reply in
+            replyAction.send(reply)
+            log.append(from: config.trustedSender, message: rawMessage,
+                       action: "goal_checkin", result: reply.hasPrefix("✅") ? "success" : "error", reply: reply)
+        }
+
+    case "goal_add":
+        guard let ga = goalAction else { break }
+        let name = result.params["name"] as? String ?? ""
+        let freq = result.params["frequency"] as? String ?? "daily"
+        let reminderTime = result.params["reminder_time"] as? String
+        let location = result.params["location"] as? String
+        let addedGoal = ga.store.addGoal(name: name, frequency: freq, reminderTime: reminderTime, location: location)
+        ga.reminder.reschedule()
+        var reply = "✅ Goal added: \"\(addedGoal.name)\" (\(addedGoal.frequency))"
+        if let t = addedGoal.reminderTime { reply += " — reminder at \(t)" }
+        if let loc = addedGoal.location { reply += " — 📍 auto-check-in at \(loc)" }
+        replyAction.send(reply)
+        log.append(from: config.trustedSender, message: rawMessage,
+                   action: "goal_add", result: "success", reply: reply)
+
+    case "finforge_briefing":
+        guard let ff = finforgeAction else { break }
+        ff.briefing { text in
+            replyAction.send(text)
+            log.append(from: config.trustedSender, message: rawMessage,
+                       action: "finforge_briefing", result: "ok", reply: text)
+        }
+
+    case "finforge_portfolio":
+        guard let ff = finforgeAction else { break }
+        ff.portfolio { text in
+            replyAction.send(text)
+            log.append(from: config.trustedSender, message: rawMessage,
+                       action: "finforge_portfolio", result: "ok", reply: text)
+        }
+
+    case "finforge_predict":
+        guard let ff = finforgeAction else { break }
+        let symbol = result.params["symbol"] as? String ?? "SPY"
+        ff.predict(symbol: symbol) { text in
+            replyAction.send(text)
+            log.append(from: config.trustedSender, message: rawMessage,
+                       action: "finforge_predict", result: "ok", reply: text)
+        }
+
+    case "finforge_goals":
+        guard let ff = finforgeAction else { break }
+        ff.goals { text in
+            replyAction.send(text)
+            log.append(from: config.trustedSender, message: rawMessage,
+                       action: "finforge_goals", result: "ok", reply: text)
+        }
+
+    case "finforge_watchlist":
+        guard let ff = finforgeAction else { break }
+        ff.watchlist { text in
+            replyAction.send(text)
+            log.append(from: config.trustedSender, message: rawMessage,
+                       action: "finforge_watchlist", result: "ok", reply: text)
+        }
+
+    case "finforge_chat":
+        guard let ff = finforgeAction else { break }
+        let msg = result.params["message"] as? String ?? rawMessage
+        ff.chat(message: msg) { text in
+            replyAction.send(text)
+            log.append(from: config.trustedSender, message: rawMessage,
+                       action: "finforge_chat", result: "ok", reply: text)
+        }
+
     case "error":
-        let reply = "⚠️ NLP routing failed. Try a /slash command instead. Type /help for options."
+        let reason = result.params["reason"] as? String ?? "Unknown error"
+        let reply = "⚠️ NLP error: \(reason)"
         replyAction.send(reply)
         log.append(from: config.trustedSender, message: rawMessage,
                    action: "nlp_error", result: "error", reply: reply)
 
-    default: // "unknown" or anything else
+    default:
         let reason = result.params["reason"] as? String ?? "Could not understand message"
         let reply  = "🤔 \(reason). Try /help for available commands."
         replyAction.send(reply)
@@ -278,6 +556,8 @@ func buildNLPRemindDetails(_ params: [String: Any]) -> String {
 
 // MARK: - Startup
 
+var watcher: MessageWatcher?
+
 requestEventKitAccess { granted in
     if !granted {
         print("[NateBot] WARNING: EventKit access denied. Calendar/Reminder features will fail.")
@@ -286,11 +566,16 @@ requestEventKitAccess { granted in
     }
 
     // Start message watcher
-    let watcher = MessageWatcher(trustedSender: config.trustedSender) { rawMessage in
+    let w = MessageWatcher(trustedSender: configManager.current.trustedSender) { rawMessage in
         let command = commandRouter.route(rawMessage)
         dispatch(command, rawMessage: rawMessage)
     }
-    watcher.start()
+    watcher = w
+    w.start()
+
+    // Wire FinForge to monitors and briefing
+    proactiveMonitor.finforgeAction = finforgeAction
+    morningBriefing.finforgeAction = finforgeAction
 
     // Start proactive monitors
     proactiveMonitor.start()
@@ -298,13 +583,46 @@ requestEventKitAccess { granted in
     // Schedule morning briefing
     morningBriefing.scheduleDailyBriefing()
 
+    // Schedule goal reminders
+    goalReminder?.scheduleAllReminders()
+
+    // Start location tracking
+    locationTracker?.startTracking()
+
+    // Schedule evening briefing (if configured)
+    morningBriefing.scheduleEveningBriefing()
+
+    // Start web UI
+    // Wire location tracker to goals for auto-check-in
+    locationTracker?.goalStore = sharedGoalStore
+    locationTracker?.reply = replyAction
+
+    // Wire location tracker to goal reminders for location context
+    goalReminder?.locationTracker = locationTracker
+
+    // Pass location tracker to morning briefing for evening summaries
+    morningBriefing.locationTracker = locationTracker
+
+    let webRouter = WebRouter(
+        configManager: configManager,
+        log: log,
+        goalStore: sharedGoalStore,
+        locationTracker: locationTracker,
+        calendarAction: calendarAction,
+        reminderAction: reminderAction,
+        statusAction: statusAction,
+        systemAction: systemAction
+    )
+    let webServer = WebServer(router: webRouter)
+    webServer.start(host: configManager.current.webUIHost, port: configManager.current.webUIPort)
+
     // Send startup message
     let ts = DateFormatter.localizedString(from: Date(), dateStyle: .short, timeStyle: .short)
-    let startupMsg = "🤖 NateBot is online. \(ts) — \(config.apps.count) app\(config.apps.count == 1 ? "" : "s") registered, monitors active."
+    let startupMsg = "🤖 NateBot is online. \(ts) — \(configManager.current.apps.count) app\(configManager.current.apps.count == 1 ? "" : "s") registered, monitors active."
     replyAction.send(startupMsg)
     log.append(from: "system", message: "startup", action: "startup", result: "ok", reply: startupMsg)
 
-    print("[NateBot] Online. Listening for messages from \(config.trustedSender)")
+    print("[NateBot] Online. Listening for messages from \(configManager.current.trustedSender)")
 }
 
 // Keep daemon alive

@@ -6,84 +6,168 @@
     "dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/CalendarAction.d",
     "object": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/CalendarAction.swift.o",
     "swiftmodule": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/CalendarAction~partial.swiftmodule",
-    "swift-dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/CalendarAction.swiftdeps"
+    "swift-dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/CalendarAction.swiftdeps",
+    "diagnostics": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/CalendarAction.dia"
+  },
+  "/Users/nathanblatter/Desktop/natebot/natebot/Actions/FinForgeAction.swift": {
+    "dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/FinForgeAction.d",
+    "object": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/FinForgeAction.swift.o",
+    "swiftmodule": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/FinForgeAction~partial.swiftmodule",
+    "swift-dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/FinForgeAction.swiftdeps",
+    "diagnostics": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/FinForgeAction.dia"
   },
   "/Users/nathanblatter/Desktop/natebot/natebot/Actions/ReminderAction.swift": {
     "dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/ReminderAction.d",
     "object": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/ReminderAction.swift.o",
     "swiftmodule": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/ReminderAction~partial.swiftmodule",
-    "swift-dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/ReminderAction.swiftdeps"
+    "swift-dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/ReminderAction.swiftdeps",
+    "diagnostics": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/ReminderAction.dia"
   },
   "/Users/nathanblatter/Desktop/natebot/natebot/Actions/ReplyAction.swift": {
     "dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/ReplyAction.d",
     "object": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/ReplyAction.swift.o",
     "swiftmodule": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/ReplyAction~partial.swiftmodule",
-    "swift-dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/ReplyAction.swiftdeps"
+    "swift-dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/ReplyAction.swiftdeps",
+    "diagnostics": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/ReplyAction.dia"
   },
   "/Users/nathanblatter/Desktop/natebot/natebot/Actions/StatusAction.swift": {
     "dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/StatusAction.d",
     "object": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/StatusAction.swift.o",
     "swiftmodule": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/StatusAction~partial.swiftmodule",
-    "swift-dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/StatusAction.swiftdeps"
+    "swift-dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/StatusAction.swiftdeps",
+    "diagnostics": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/StatusAction.dia"
   },
   "/Users/nathanblatter/Desktop/natebot/natebot/Actions/SystemAction.swift": {
     "dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/SystemAction.d",
     "object": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/SystemAction.swift.o",
     "swiftmodule": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/SystemAction~partial.swiftmodule",
-    "swift-dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/SystemAction.swiftdeps"
+    "swift-dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/SystemAction.swiftdeps",
+    "diagnostics": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/SystemAction.dia"
   },
   "/Users/nathanblatter/Desktop/natebot/natebot/Claude/ClaudeAPI.swift": {
     "dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/ClaudeAPI.d",
     "object": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/ClaudeAPI.swift.o",
     "swiftmodule": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/ClaudeAPI~partial.swiftmodule",
-    "swift-dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/ClaudeAPI.swiftdeps"
+    "swift-dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/ClaudeAPI.swiftdeps",
+    "diagnostics": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/ClaudeAPI.dia"
   },
   "/Users/nathanblatter/Desktop/natebot/natebot/Config/Config.swift": {
     "dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/Config.d",
     "object": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/Config.swift.o",
     "swiftmodule": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/Config~partial.swiftmodule",
-    "swift-dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/Config.swiftdeps"
+    "swift-dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/Config.swiftdeps",
+    "diagnostics": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/Config.dia"
+  },
+  "/Users/nathanblatter/Desktop/natebot/natebot/Config/ConfigManager.swift": {
+    "dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/ConfigManager.d",
+    "object": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/ConfigManager.swift.o",
+    "swiftmodule": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/ConfigManager~partial.swiftmodule",
+    "swift-dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/ConfigManager.swiftdeps",
+    "diagnostics": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/ConfigManager.dia"
+  },
+  "/Users/nathanblatter/Desktop/natebot/natebot/Goals/GoalAction.swift": {
+    "dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/GoalAction.d",
+    "object": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/GoalAction.swift.o",
+    "swiftmodule": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/GoalAction~partial.swiftmodule",
+    "swift-dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/GoalAction.swiftdeps",
+    "diagnostics": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/GoalAction.dia"
+  },
+  "/Users/nathanblatter/Desktop/natebot/natebot/Goals/GoalReminder.swift": {
+    "dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/GoalReminder.d",
+    "object": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/GoalReminder.swift.o",
+    "swiftmodule": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/GoalReminder~partial.swiftmodule",
+    "swift-dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/GoalReminder.swiftdeps",
+    "diagnostics": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/GoalReminder.dia"
+  },
+  "/Users/nathanblatter/Desktop/natebot/natebot/Goals/GoalStore.swift": {
+    "dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/GoalStore.d",
+    "object": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/GoalStore.swift.o",
+    "swiftmodule": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/GoalStore~partial.swiftmodule",
+    "swift-dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/GoalStore.swiftdeps",
+    "diagnostics": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/GoalStore.dia"
+  },
+  "/Users/nathanblatter/Desktop/natebot/natebot/Location/FindMyLocationScraper.swift": {
+    "dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/FindMyLocationScraper.d",
+    "object": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/FindMyLocationScraper.swift.o",
+    "swiftmodule": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/FindMyLocationScraper~partial.swiftmodule",
+    "swift-dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/FindMyLocationScraper.swiftdeps",
+    "diagnostics": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/FindMyLocationScraper.dia"
+  },
+  "/Users/nathanblatter/Desktop/natebot/natebot/Location/LocationTracker.swift": {
+    "dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/LocationTracker.d",
+    "object": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/LocationTracker.swift.o",
+    "swiftmodule": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/LocationTracker~partial.swiftmodule",
+    "swift-dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/LocationTracker.swiftdeps",
+    "diagnostics": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/LocationTracker.dia"
   },
   "/Users/nathanblatter/Desktop/natebot/natebot/Log/ActivityLog.swift": {
     "dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/ActivityLog.d",
     "object": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/ActivityLog.swift.o",
     "swiftmodule": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/ActivityLog~partial.swiftmodule",
-    "swift-dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/ActivityLog.swiftdeps"
+    "swift-dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/ActivityLog.swiftdeps",
+    "diagnostics": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/ActivityLog.dia"
   },
   "/Users/nathanblatter/Desktop/natebot/natebot/Router/CommandRouter.swift": {
     "dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/CommandRouter.d",
     "object": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/CommandRouter.swift.o",
     "swiftmodule": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/CommandRouter~partial.swiftmodule",
-    "swift-dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/CommandRouter.swiftdeps"
+    "swift-dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/CommandRouter.swiftdeps",
+    "diagnostics": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/CommandRouter.dia"
   },
   "/Users/nathanblatter/Desktop/natebot/natebot/Router/NLPRouter.swift": {
     "dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/NLPRouter.d",
     "object": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/NLPRouter.swift.o",
     "swiftmodule": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/NLPRouter~partial.swiftmodule",
-    "swift-dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/NLPRouter.swiftdeps"
+    "swift-dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/NLPRouter.swiftdeps",
+    "diagnostics": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/NLPRouter.dia"
   },
   "/Users/nathanblatter/Desktop/natebot/natebot/Scheduler/MorningBriefing.swift": {
     "dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/MorningBriefing.d",
     "object": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/MorningBriefing.swift.o",
     "swiftmodule": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/MorningBriefing~partial.swiftmodule",
-    "swift-dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/MorningBriefing.swiftdeps"
+    "swift-dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/MorningBriefing.swiftdeps",
+    "diagnostics": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/MorningBriefing.dia"
   },
   "/Users/nathanblatter/Desktop/natebot/natebot/Scheduler/ProactiveMonitor.swift": {
     "dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/ProactiveMonitor.d",
     "object": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/ProactiveMonitor.swift.o",
     "swiftmodule": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/ProactiveMonitor~partial.swiftmodule",
-    "swift-dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/ProactiveMonitor.swiftdeps"
+    "swift-dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/ProactiveMonitor.swiftdeps",
+    "diagnostics": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/ProactiveMonitor.dia"
   },
   "/Users/nathanblatter/Desktop/natebot/natebot/Watcher/MessageWatcher.swift": {
     "dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/MessageWatcher.d",
     "object": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/MessageWatcher.swift.o",
     "swiftmodule": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/MessageWatcher~partial.swiftmodule",
-    "swift-dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/MessageWatcher.swiftdeps"
+    "swift-dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/MessageWatcher.swiftdeps",
+    "diagnostics": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/MessageWatcher.dia"
+  },
+  "/Users/nathanblatter/Desktop/natebot/natebot/WebServer/WebRouter.swift": {
+    "dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/WebRouter.d",
+    "object": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/WebRouter.swift.o",
+    "swiftmodule": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/WebRouter~partial.swiftmodule",
+    "swift-dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/WebRouter.swiftdeps",
+    "diagnostics": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/WebRouter.dia"
+  },
+  "/Users/nathanblatter/Desktop/natebot/natebot/WebServer/WebServer.swift": {
+    "dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/WebServer.d",
+    "object": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/WebServer.swift.o",
+    "swiftmodule": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/WebServer~partial.swiftmodule",
+    "swift-dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/WebServer.swiftdeps",
+    "diagnostics": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/WebServer.dia"
+  },
+  "/Users/nathanblatter/Desktop/natebot/natebot/WebServer/WebUI.swift": {
+    "dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/WebUI.d",
+    "object": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/WebUI.swift.o",
+    "swiftmodule": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/WebUI~partial.swiftmodule",
+    "swift-dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/WebUI.swiftdeps",
+    "diagnostics": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/WebUI.dia"
   },
   "/Users/nathanblatter/Desktop/natebot/natebot/main.swift": {
     "dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/main.d",
     "object": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/main.swift.o",
     "swiftmodule": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/main~partial.swiftmodule",
-    "swift-dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/main.swiftdeps"
+    "swift-dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/main.swiftdeps",
+    "diagnostics": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/debug/natebot.build/main.dia"
   }
 }

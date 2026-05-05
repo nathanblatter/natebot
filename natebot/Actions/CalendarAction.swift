@@ -42,7 +42,7 @@ class CalendarAction {
                     completion("⚠️ Could not parse event details. Try: /cal add dentist Friday 2pm")
                     return
                 }
-                self.createEKEvent(event, completion: completion)
+                completion(self.createEKEvent(event))
             }
         }
     }
@@ -77,22 +77,55 @@ class CalendarAction {
                 }
                 var created = 0
                 var failed  = 0
-                let group = DispatchGroup()
 
                 for event in events {
-                    group.enter()
-                    self.createEKEvent(event) { msg in
-                        if msg.hasPrefix("✅") { created += 1 } else { failed += 1 }
-                        group.leave()
-                    }
+                    let msg = self.createEKEvent(event)
+                    if msg.hasPrefix("✅") { created += 1 } else { failed += 1 }
                 }
 
-                group.notify(queue: .main) {
-                    var reply = "📅 Created \(created) calendar event\(created == 1 ? "" : "s")."
-                    if failed > 0 { reply += " (\(failed) failed)" }
-                    completion(reply)
-                }
+                var reply = "📅 Created \(created) calendar event\(created == 1 ? "" : "s")."
+                if failed > 0 { reply += " (\(failed) failed)" }
+                completion(reply)
             }
+        }
+    }
+
+    // MARK: - List Upcoming Events
+
+    func listUpcomingEvents(days: Int, completion: @escaping ([[String: Any]]) -> Void) {
+        let start = Date()
+        guard let end = Calendar.current.date(byAdding: .day, value: days, to: start) else {
+            completion([]); return
+        }
+        let pred = store.predicateForEvents(withStart: start, end: end, calendars: nil)
+        let events = store.events(matching: pred).sorted { $0.startDate < $1.startDate }
+        let df = ISO8601DateFormatter()
+        let result: [[String: Any]] = events.map { e in
+            var d: [String: Any] = [
+                "id": e.eventIdentifier ?? "",
+                "title": e.title ?? "Untitled",
+                "startDate": df.string(from: e.startDate),
+                "endDate": df.string(from: e.endDate),
+                "calendar": e.calendar?.title ?? ""
+            ]
+            if let loc = e.location { d["location"] = loc }
+            if let notes = e.notes { d["notes"] = notes }
+            return d
+        }
+        completion(result)
+    }
+
+    // MARK: - Delete Event
+
+    func deleteEvent(eventId: String, completion: @escaping (Bool, String) -> Void) {
+        guard let event = store.event(withIdentifier: eventId) else {
+            completion(false, "Event not found"); return
+        }
+        do {
+            try store.remove(event, span: .thisEvent, commit: true)
+            completion(true, "Deleted")
+        } catch {
+            completion(false, error.localizedDescription)
         }
     }
 
@@ -144,20 +177,18 @@ class CalendarAction {
 
     // MARK: - Private: EventKit
 
-    private func createEKEvent(_ event: EventData, completion: @escaping (String) -> Void) {
+    @discardableResult
+    private func createEKEvent(_ event: EventData) -> String {
         let calName = config.calendars.defaultCalendar
-
-        // Find configured calendar, fall back to default
         let calendar = store.calendars(for: .event).first(where: { $0.title == calName })
                     ?? store.defaultCalendarForNewEvents
 
         guard let calendar = calendar else {
-            completion("⚠️ No writable calendar found. Check EventKit access.")
-            return
+            return "⚠️ No writable calendar found. Check EventKit access."
         }
 
         let ekEvent = EKEvent(eventStore: store)
-        ekEvent.title    = event.title
+        ekEvent.title     = event.title
         ekEvent.startDate = event.startDate
         ekEvent.endDate   = event.endDate
         ekEvent.location  = event.location
@@ -168,9 +199,9 @@ class CalendarAction {
             try store.save(ekEvent, span: .thisEvent, commit: true)
             let df = DateFormatter()
             df.dateFormat = "MMM d 'at' h:mm a"
-            completion("✅ Added '\(event.title)' to calendar — \(df.string(from: event.startDate))")
+            return "✅ Added '\(event.title)' to calendar — \(df.string(from: event.startDate))"
         } catch {
-            completion("⚠️ Failed to save '\(event.title)': \(error.localizedDescription)")
+            return "⚠️ Failed to save '\(event.title)': \(error.localizedDescription)"
         }
     }
 }

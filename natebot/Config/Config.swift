@@ -12,6 +12,11 @@ struct Config: Codable {
     let monitors: [MonitorConfig]
     let calendars: CalendarConfig
     let reminderLists: ReminderListConfig
+    let goalTracking: GoalTrackingConfig?
+    let locationTracking: LocationConfig?
+    let finforge: FinForgeConfig?
+    let webUIPort: Int
+    let webUIHost: String
 
     enum CodingKeys: String, CodingKey {
         case trustedSender = "trusted_sender"
@@ -19,6 +24,29 @@ struct Config: Codable {
         case claudeApiKey = "claude_api_key"
         case briefing, log, apps, monitors, calendars
         case reminderLists = "reminder_lists"
+        case goalTracking = "goal_tracking"
+        case locationTracking = "location_tracking"
+        case finforge
+        case webUIPort = "webui_port"
+        case webUIHost = "webui_host"
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        trustedSender = try c.decode(String.self, forKey: .trustedSender)
+        passphrase    = try c.decode(String.self, forKey: .passphrase)
+        claudeApiKey  = try c.decode(String.self, forKey: .claudeApiKey)
+        briefing      = try c.decode(BriefingConfig.self, forKey: .briefing)
+        log           = try c.decode(LogConfig.self, forKey: .log)
+        apps          = try c.decode([AppConfig].self, forKey: .apps)
+        monitors      = try c.decode([MonitorConfig].self, forKey: .monitors)
+        calendars     = try c.decode(CalendarConfig.self, forKey: .calendars)
+        reminderLists = try c.decode(ReminderListConfig.self, forKey: .reminderLists)
+        goalTracking  = try c.decodeIfPresent(GoalTrackingConfig.self, forKey: .goalTracking)
+        locationTracking = try c.decodeIfPresent(LocationConfig.self, forKey: .locationTracking)
+        finforge      = try c.decodeIfPresent(FinForgeConfig.self, forKey: .finforge)
+        webUIPort     = try c.decodeIfPresent(Int.self, forKey: .webUIPort) ?? 47382
+        webUIHost     = try c.decodeIfPresent(String.self, forKey: .webUIHost) ?? "127.0.0.1"
     }
 }
 
@@ -26,13 +54,23 @@ struct Config: Codable {
 
 struct BriefingConfig: Codable {
     let time: String          // "07:00"
+    let eveningTime: String?  // "21:00" — optional evening briefing
     let includeOverdue: Bool
     let upcomingDays: Int
 
     enum CodingKeys: String, CodingKey {
         case time
+        case eveningTime = "evening_time"
         case includeOverdue = "include_overdue"
         case upcomingDays = "upcoming_days"
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        time = try c.decode(String.self, forKey: .time)
+        eveningTime = try c.decodeIfPresent(String.self, forKey: .eveningTime)
+        includeOverdue = try c.decode(Bool.self, forKey: .includeOverdue)
+        upcomingDays = try c.decode(Int.self, forKey: .upcomingDays)
     }
 }
 
@@ -95,6 +133,44 @@ struct ReminderListConfig: Codable {
     }
 }
 
+struct GoalTrackingConfig: Codable {
+    let enabled: Bool
+    let weeklySummaryDay: Int    // 0=Sunday
+    let weeklySummaryTime: String // "14:00"
+
+    enum CodingKeys: String, CodingKey {
+        case enabled
+        case weeklySummaryDay = "weekly_summary_day"
+        case weeklySummaryTime = "weekly_summary_time"
+    }
+}
+
+struct FinForgeConfig: Codable {
+    let enabled: Bool
+    let apiUrl: String      // "http://localhost:8001/api/v1"
+    let apiKey: String
+    let pollIntervalSeconds: Int  // 60
+
+    enum CodingKeys: String, CodingKey {
+        case enabled
+        case apiUrl = "api_url"
+        case apiKey = "api_key"
+        case pollIntervalSeconds = "poll_interval_seconds"
+    }
+}
+
+struct LocationConfig: Codable {
+    let enabled: Bool
+    let device: String                    // e.g. "iPhone"
+    let namedLocations: [String: String]  // address substring → label
+
+    enum CodingKeys: String, CodingKey {
+        case enabled
+        case device
+        case namedLocations = "named_locations"
+    }
+}
+
 // MARK: - Loader
 
 enum ConfigError: Error {
@@ -104,17 +180,17 @@ enum ConfigError: Error {
 
 class ConfigLoader {
     static func load() throws -> Config {
+        return try loadWithURL().0
+    }
+
+    static func loadWithURL() throws -> (Config, URL) {
         let home = ProcessInfo.processInfo.environment["HOME"] ?? ""
         let candidates: [String] = [
-            // Same directory as executable
             Bundle.main.bundlePath + "/Resources/natebot.json",
             Bundle.main.bundlePath + "/natebot.json",
-            // Relative to working directory
             "Resources/natebot.json",
             "natebot.json",
-            // ~/.config
             "\(home)/.config/natebot/natebot.json",
-            // Application Support
             "\(home)/Library/Application Support/NateBot/natebot.json"
         ]
 
@@ -122,7 +198,8 @@ class ConfigLoader {
             let url = URL(fileURLWithPath: path)
             if let data = try? Data(contentsOf: url) {
                 do {
-                    return try JSONDecoder().decode(Config.self, from: data)
+                    let config = try JSONDecoder().decode(Config.self, from: data)
+                    return (config, url)
                 } catch let decErr as DecodingError {
                     switch decErr {
                     case .keyNotFound(let key, let ctx):

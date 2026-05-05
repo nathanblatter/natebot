@@ -1,0 +1,16 @@
+.build/
+.swiftpm/
+*.xcuserstate
+xcuserdata/
+DerivedData/
+
+# Config with secrets (use natebot.example.json as template)
+natebot/Resources/natebot.json
+
+# OS
+.DS_Store
+
+# IDE
+.claude/
+.idea/
+.vscode/

@@ -27,6 +27,19 @@ class ClaudeAPI {
         struct ThinkingConfig: Encodable {
             let type: String  // "adaptive"
         }
+
+        enum CodingKeys: String, CodingKey {
+            case model, max_tokens, system, messages, thinking
+        }
+
+        func encode(to encoder: Encoder) throws {
+            var c = encoder.container(keyedBy: CodingKeys.self)
+            try c.encode(model, forKey: .model)
+            try c.encode(max_tokens, forKey: .max_tokens)
+            try c.encodeIfPresent(system, forKey: .system)
+            try c.encode(messages, forKey: .messages)
+            try c.encodeIfPresent(thinking, forKey: .thinking)
+        }
     }
 
     private struct ResponseBody: Decodable {

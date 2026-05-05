@@ -1,0 +1,17 @@
+name: Deploy
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - name: Deploy
+        run: |
+          cd /Users/nathanblatter/Desktop/natebot
+          git pull origin main
+          swift build -c release
+          sudo cp .build/release/natebot /usr/local/bin/natebot
+          launchctl unload ~/Library/LaunchAgents/com.natebot.daemon.plist 2>/dev/null || true
+          launchctl load ~/Library/LaunchAgents/com.natebot.daemon.plist
