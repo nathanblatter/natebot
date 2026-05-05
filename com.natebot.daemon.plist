@@ -9,7 +9,7 @@
     <!-- Path to the compiled NateBot binary -->
     <key>ProgramArguments</key>
     <array>
-        <string>/usr/local/bin/natebot</string>
+        <string>/Users/nathanblatter/.local/bin/natebot</string>
     </array>
 
     <!-- Auto-start on login -->
@@ -22,7 +22,7 @@
 
     <!-- Working directory (where natebot.json is looked up relative to) -->
     <key>WorkingDirectory</key>
-    <string>/usr/local/bin</string>
+    <string>/Users/nathanblatter/.local/bin</string>
 
     <!-- Log stdout / stderr to files for debugging -->
     <key>StandardOutPath</key>

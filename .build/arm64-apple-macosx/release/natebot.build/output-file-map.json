@@ -10,6 +10,12 @@
     "swift-dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/release/natebot.build/CalendarAction.swiftdeps",
     "diagnostics": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/release/natebot.build/CalendarAction.dia"
   },
+  "/Users/nathanblatter/Desktop/natebot/natebot/Actions/FinForgeAction.swift": {
+    "object": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/release/natebot.build/FinForgeAction.swift.o",
+    "swiftmodule": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/release/natebot.build/FinForgeAction~partial.swiftmodule",
+    "swift-dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/release/natebot.build/FinForgeAction.swiftdeps",
+    "diagnostics": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/release/natebot.build/FinForgeAction.dia"
+  },
   "/Users/nathanblatter/Desktop/natebot/natebot/Actions/ReminderAction.swift": {
     "object": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/release/natebot.build/ReminderAction.swift.o",
     "swiftmodule": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/release/natebot.build/ReminderAction~partial.swiftmodule",
@@ -46,6 +52,12 @@
     "swift-dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/release/natebot.build/Config.swiftdeps",
     "diagnostics": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/release/natebot.build/Config.dia"
   },
+  "/Users/nathanblatter/Desktop/natebot/natebot/Config/ConfigManager.swift": {
+    "object": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/release/natebot.build/ConfigManager.swift.o",
+    "swiftmodule": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/release/natebot.build/ConfigManager~partial.swiftmodule",
+    "swift-dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/release/natebot.build/ConfigManager.swiftdeps",
+    "diagnostics": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/release/natebot.build/ConfigManager.dia"
+  },
   "/Users/nathanblatter/Desktop/natebot/natebot/Goals/GoalAction.swift": {
     "object": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/release/natebot.build/GoalAction.swift.o",
     "swiftmodule": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/release/natebot.build/GoalAction~partial.swiftmodule",
@@ -63,6 +75,18 @@
     "swiftmodule": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/release/natebot.build/GoalStore~partial.swiftmodule",
     "swift-dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/release/natebot.build/GoalStore.swiftdeps",
     "diagnostics": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/release/natebot.build/GoalStore.dia"
+  },
+  "/Users/nathanblatter/Desktop/natebot/natebot/Location/FindMyLocationScraper.swift": {
+    "object": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/release/natebot.build/FindMyLocationScraper.swift.o",
+    "swiftmodule": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/release/natebot.build/FindMyLocationScraper~partial.swiftmodule",
+    "swift-dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/release/natebot.build/FindMyLocationScraper.swiftdeps",
+    "diagnostics": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/release/natebot.build/FindMyLocationScraper.dia"
+  },
+  "/Users/nathanblatter/Desktop/natebot/natebot/Location/LocationTracker.swift": {
+    "object": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/release/natebot.build/LocationTracker.swift.o",
+    "swiftmodule": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/release/natebot.build/LocationTracker~partial.swiftmodule",
+    "swift-dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/release/natebot.build/LocationTracker.swiftdeps",
+    "diagnostics": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/release/natebot.build/LocationTracker.dia"
   },
   "/Users/nathanblatter/Desktop/natebot/natebot/Log/ActivityLog.swift": {
     "object": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/release/natebot.build/ActivityLog.swift.o",
@@ -99,6 +123,24 @@
     "swiftmodule": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/release/natebot.build/MessageWatcher~partial.swiftmodule",
     "swift-dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/release/natebot.build/MessageWatcher.swiftdeps",
     "diagnostics": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/release/natebot.build/MessageWatcher.dia"
+  },
+  "/Users/nathanblatter/Desktop/natebot/natebot/WebServer/WebRouter.swift": {
+    "object": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/release/natebot.build/WebRouter.swift.o",
+    "swiftmodule": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/release/natebot.build/WebRouter~partial.swiftmodule",
+    "swift-dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/release/natebot.build/WebRouter.swiftdeps",
+    "diagnostics": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/release/natebot.build/WebRouter.dia"
+  },
+  "/Users/nathanblatter/Desktop/natebot/natebot/WebServer/WebServer.swift": {
+    "object": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/release/natebot.build/WebServer.swift.o",
+    "swiftmodule": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/release/natebot.build/WebServer~partial.swiftmodule",
+    "swift-dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/release/natebot.build/WebServer.swiftdeps",
+    "diagnostics": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/release/natebot.build/WebServer.dia"
+  },
+  "/Users/nathanblatter/Desktop/natebot/natebot/WebServer/WebUI.swift": {
+    "object": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/release/natebot.build/WebUI.swift.o",
+    "swiftmodule": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/release/natebot.build/WebUI~partial.swiftmodule",
+    "swift-dependencies": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/release/natebot.build/WebUI.swiftdeps",
+    "diagnostics": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/release/natebot.build/WebUI.dia"
   },
   "/Users/nathanblatter/Desktop/natebot/natebot/main.swift": {
     "object": "/Users/nathanblatter/Desktop/natebot/.build/arm64-apple-macosx/release/natebot.build/main.swift.o",

@@ -12,6 +12,6 @@ jobs:
           cd /Users/nathanblatter/Desktop/natebot
           git pull origin main
           swift build -c release
-          sudo cp .build/release/natebot /usr/local/bin/natebot
           launchctl unload ~/Library/LaunchAgents/com.natebot.daemon.plist 2>/dev/null || true
+          cp .build/release/natebot /Users/nathanblatter/.local/bin/natebot
           launchctl load ~/Library/LaunchAgents/com.natebot.daemon.plist
