@@ -49,6 +49,17 @@ class NLPRouter {
     - finforge_watchlist → user asks about watchlist, stock prices they're tracking.              params: {}
     - finforge_chat      → user asks any other finance question that needs detailed analysis.
                            params: { message (the original question) }
+    - kpi_log        → User is reporting a personal health/productivity metric in freeform text \
+                       (NOT a goal check-in). Examples: "I'm at a 9 for life satisfaction", \
+                       "my energy is 6 this morning", "I solved 4 leetcode problems", \
+                       "I met 3 new people today", "I had 2 meaningful conversations", \
+                       "I came up with 5 ideas", "I went to the temple", "I went to church", \
+                       "my satisfaction today is 7/10".
+                       params: one or more of:
+                         life_sat (int 1-10), energy_am (int 1-10), lc_solved (int),
+                         new_people (int), meaningful_convos (int), ideas_count (int),
+                         temple (bool), church (bool), workout_type (string e.g. "Gym")
+                       Only include fields the user actually mentioned.
     - unknown        → Cannot determine.        params: { reason }
 
     Rules:
@@ -56,6 +67,8 @@ class NLPRouter {
     - Format: {"action":"action_name","params":{...}}
     - For cal_parse / remind_parse, set params.text to the full original message.
     - For status_single, match app_name to common names (e.g. "survivor", "therapist", "codenames").
+    - Prefer kpi_log over goal_checkin when the user is reporting a measurable value (number, rating).
+    - Prefer goal_checkin when the user says they completed a habitual activity with no numeric value.
     """
 
     init(claude: ClaudeAPI) {

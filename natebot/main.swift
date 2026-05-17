@@ -538,6 +538,39 @@ func dispatchNLP(_ result: NLPResult, rawMessage: String) {
                        action: "finforge_chat", result: "ok", reply: text)
         }
 
+    case "kpi_log":
+        guard let km = kpiManager else {
+            replyAction.send("⚠️ KPI tracking is not enabled.")
+            break
+        }
+        // result.params is already the KPI fields dict
+        var fields: [String: Any] = [:]
+        let intKeys = ["life_sat", "energy_am", "lc_solved", "new_people", "meaningful_convos", "ideas_count"]
+        let boolKeys = ["temple", "church"]
+        for key in intKeys {
+            if let v = result.params[key] {
+                if let n = v as? Int { fields[key] = n }
+                else if let s = v as? String, let n = Int(s) { fields[key] = n }
+                else if let d = v as? Double { fields[key] = Int(d) }
+            }
+        }
+        for key in boolKeys {
+            if let v = result.params[key] {
+                if let b = v as? Bool { fields[key] = b }
+                else if let s = v as? String { fields[key] = (s == "true") }
+            }
+        }
+        if let wt = result.params["workout_type"] as? String { fields["workout_type"] = wt }
+        guard !fields.isEmpty else {
+            replyAction.send("Couldn't extract any KPI values from that. Try /kpi sat 9.")
+            break
+        }
+        let kpiReply = "Logged: " + fields.map { "\($0.key) = \($0.value)" }.sorted().joined(separator: ", ")
+        km.ingestFields(fields)
+        replyAction.send(kpiReply)
+        log.append(from: config.trustedSender, message: rawMessage,
+                   action: "kpi_log", result: "ok", reply: kpiReply)
+
     case "error":
         let reason = result.params["reason"] as? String ?? "Unknown error"
         let reply = "⚠️ NLP error: \(reason)"

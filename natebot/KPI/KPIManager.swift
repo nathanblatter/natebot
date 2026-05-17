@@ -110,6 +110,12 @@ class KPIManager {
         }
     }
 
+    // MARK: - Public ingest (for NLP kpi_log dispatch in main.swift)
+
+    func ingestFields(_ fields: [String: Any]) {
+        client.ingest(fields)
+    }
+
     // MARK: - Part 3: Goal Check-in Side-Effects
 
     /// Called from GoalAction after any goal check-in. Posts KPI field if the goal matches.
@@ -195,17 +201,19 @@ class KPIManager {
             guard !noteText.isEmpty else {
                 completion("Usage: /kpi note <text>"); return
             }
-            let ts = DateFormatter().apply { $0.dateFormat = "yyyy-MM-dd HH:mm" }.string(from: Date())
-            let newNote = "[\(ts)] \(noteText)"
-            // Read existing notes to append
+            let ts = DateFormatter().apply { $0.dateFormat = "HH:mm" }.string(from: Date())
+            let newEntry = "• [\(ts)] \(noteText)"
+            // Read existing notes via psql, then append as a list item
             let today = todayString()
             let sql = "SELECT notes FROM kpi_daily_log WHERE date = '\(today)' LIMIT 1;"
             DispatchQueue.global(qos: .utility).async { [weak self] in
                 guard let self = self else { return }
-                var combined = newNote
-                if let existing = self.client.queryDB(sql: sql, dbURL: self.dbURL),
-                   !existing.isEmpty {
-                    combined = existing + " | " + newNote
+                var combined = newEntry
+                if let raw = self.client.queryDB(sql: sql, dbURL: self.dbURL) {
+                    let existing = self.unquoteCSV(raw)
+                    if !existing.isEmpty {
+                        combined = existing + "\n" + newEntry
+                    }
                 }
                 self.client.ingest(["notes": combined]) { ok in
                     DispatchQueue.main.async { completion(ok ? "Logged." : "Failed to log.") }
@@ -519,6 +527,18 @@ class KPIManager {
 
     private func parseInt(_ s: String) -> Int? {
         Int(s.trimmingCharacters(in: .whitespaces))
+    }
+
+    // MARK: - CSV Unquoting (for psql --csv output)
+
+    /// Strip surrounding CSV double-quotes and unescape doubled quotes.
+    private func unquoteCSV(_ s: String) -> String {
+        let t = s.trimmingCharacters(in: .whitespacesAndNewlines)
+        if t.hasPrefix("\"") && t.hasSuffix("\"") && t.count >= 2 {
+            let inner = String(t.dropFirst().dropLast())
+            return inner.replacingOccurrences(of: "\"\"", with: "\"")
+        }
+        return t
     }
 
     // MARK: - State Helpers

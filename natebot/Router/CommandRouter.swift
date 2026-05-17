@@ -190,7 +190,10 @@ class CommandRouter {
 
         // MARK: /kpi
         case "/kpi":
-            let sub  = parts.count >= 2 ? parts[1].lowercased() : "help"
+            // Strip diacritics so autocorrect variants like "notę" → "note" still match
+            let rawSub = parts.count >= 2 ? parts[1] : "help"
+            let sub = rawSub.lowercased()
+                .folding(options: .diacriticInsensitive, locale: .current)
             let args = parts.count >= 3 ? Array(parts.dropFirst(2)) : []
             return .kpiCommand(subcommand: sub, args: args)
 
