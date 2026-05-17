@@ -27,12 +27,37 @@ class KPIManager {
     private var pendingCheckin: PendingCheckin?
     private let stateLock = NSLock()
 
+    // In-memory note accumulation — avoids a psql read on every /kpi note
+    private var noteLines: [String] = []
+    private var notesDate: String = ""
+    private let notesLock = NSLock()
+
     init(config: KPIConfig, claude: ClaudeAPI, reply: ReplyAction, log: ActivityLog) {
         self.client = KPIClient(apiURL: config.apiUrl, apiKey: config.apiKey)
         self.claude = claude
         self.reply  = reply
         self.log    = log
         self.dbURL  = config.dbUrl
+        seedNotesFromDB()
+    }
+
+    /// On startup: load today's existing notes from DB into memory so restarts don't lose prior notes.
+    private func seedNotesFromDB() {
+        let today = todayString()
+        let sql = "SELECT COALESCE(notes, '') FROM kpi_daily_log WHERE date = '\(today)' LIMIT 1;"
+        DispatchQueue.global(qos: .utility).async { [weak self] in
+            guard let self = self else { return }
+            if let raw = self.client.queryDB(sql: sql, dbURL: self.dbURL) {
+                let existing = self.unquoteCSV(raw)
+                let lines = existing.components(separatedBy: "\n").filter { !$0.isEmpty }
+                guard !lines.isEmpty else { return }
+                self.notesLock.lock()
+                self.noteLines = lines
+                self.notesDate = today
+                self.notesLock.unlock()
+                print("[KPIManager] Seeded \(lines.count) note(s) from DB for \(today)")
+            }
+        }
     }
 
     // MARK: - Part 1: Morning Energy Check-in
@@ -204,18 +229,20 @@ class KPIManager {
             let ts = DateFormatter().apply { $0.dateFormat = "HH:mm" }.string(from: Date())
             let newEntry = "• [\(ts)] \(noteText)"
             let today = todayString()
-            // SELECT existing notes → append new entry → write combined back
-            DispatchQueue.global(qos: .utility).async { [weak self] in
-                guard let self = self else { return }
-                let sql = "SELECT COALESCE(notes, '') FROM kpi_daily_log WHERE date = '\(today)' LIMIT 1;"
-                let existing = self.client.queryDB(sql: sql, dbURL: self.dbURL)
-                    .map { self.unquoteCSV($0) } ?? ""
-                let combined = existing.isEmpty ? newEntry : existing + "\n" + newEntry
-                self.client.ingest(["notes": combined]) { ok in
-                    DispatchQueue.main.async { completion(ok ? "Logged." : "Failed to log.") }
-                }
+
+            // Append to in-memory list (reset if it's a new day), then POST the full list
+            notesLock.lock()
+            if notesDate != today {
+                noteLines = []
+                notesDate = today
             }
-            return // async path
+            noteLines.append(newEntry)
+            let combined = noteLines.joined(separator: "\n")
+            notesLock.unlock()
+
+            client.ingest(["notes": combined]) { ok in
+                completion(ok ? "Logged." : "Failed to log.")
+            }
 
         case "status":
             fetchTodayStatus(completion: completion)
