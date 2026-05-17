@@ -571,6 +571,18 @@ func dispatchNLP(_ result: NLPResult, rawMessage: String) {
         log.append(from: config.trustedSender, message: rawMessage,
                    action: "kpi_log", result: "ok", reply: kpiReply)
 
+    case "kpi_note":
+        guard let km = kpiManager else {
+            replyAction.send("⚠️ KPI tracking is not enabled.")
+            break
+        }
+        let noteText = result.params["text"] as? String ?? rawMessage
+        km.handleCommand(subcommand: "note", args: [noteText], rawMessage: rawMessage) { reply in
+            replyAction.send(reply)
+            log.append(from: config.trustedSender, message: rawMessage,
+                       action: "kpi_note", result: "ok", reply: reply)
+        }
+
     case "error":
         let reason = result.params["reason"] as? String ?? "Unknown error"
         let reply = "⚠️ NLP error: \(reason)"

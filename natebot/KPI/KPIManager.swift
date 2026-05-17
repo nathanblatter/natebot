@@ -203,18 +203,14 @@ class KPIManager {
             }
             let ts = DateFormatter().apply { $0.dateFormat = "HH:mm" }.string(from: Date())
             let newEntry = "• [\(ts)] \(noteText)"
-            // Read existing notes via psql, then append as a list item
             let today = todayString()
-            let sql = "SELECT notes FROM kpi_daily_log WHERE date = '\(today)' LIMIT 1;"
+            // SELECT existing notes → append new entry → write combined back
             DispatchQueue.global(qos: .utility).async { [weak self] in
                 guard let self = self else { return }
-                var combined = newEntry
-                if let raw = self.client.queryDB(sql: sql, dbURL: self.dbURL) {
-                    let existing = self.unquoteCSV(raw)
-                    if !existing.isEmpty {
-                        combined = existing + "\n" + newEntry
-                    }
-                }
+                let sql = "SELECT COALESCE(notes, '') FROM kpi_daily_log WHERE date = '\(today)' LIMIT 1;"
+                let existing = self.client.queryDB(sql: sql, dbURL: self.dbURL)
+                    .map { self.unquoteCSV($0) } ?? ""
+                let combined = existing.isEmpty ? newEntry : existing + "\n" + newEntry
                 self.client.ingest(["notes": combined]) { ok in
                     DispatchQueue.main.async { completion(ok ? "Logged." : "Failed to log.") }
                 }

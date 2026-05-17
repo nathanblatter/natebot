@@ -50,16 +50,20 @@ class NLPRouter {
     - finforge_chat      → user asks any other finance question that needs detailed analysis.
                            params: { message (the original question) }
     - kpi_log        → User is reporting a personal health/productivity metric in freeform text \
-                       (NOT a goal check-in). Examples: "I'm at a 9 for life satisfaction", \
-                       "my energy is 6 this morning", "I solved 4 leetcode problems", \
-                       "I met 3 new people today", "I had 2 meaningful conversations", \
-                       "I came up with 5 ideas", "I went to the temple", "I went to church", \
-                       "my satisfaction today is 7/10".
+                       (NOT a goal check-in, NOT a note/journal entry). Examples: "I'm at a 9 \
+                       for life satisfaction", "my energy is 6 this morning", "I solved 4 \
+                       leetcode problems", "I met 3 new people today", "I had 2 meaningful \
+                       conversations", "I came up with 5 ideas", "I went to the temple", \
+                       "I went to church", "my satisfaction today is 7/10".
                        params: one or more of:
                          life_sat (int 1-10), energy_am (int 1-10), lc_solved (int),
                          new_people (int), meaningful_convos (int), ideas_count (int),
                          temple (bool), church (bool), workout_type (string e.g. "Gym")
                        Only include fields the user actually mentioned.
+    - kpi_note       → User wants to log a free-text note or journal entry. Examples: \
+                       "add a kpi note that says X", "log a note: X", "note for today: X", \
+                       "kpi note X", "add a note saying X". \
+                       params: { text (the note content, extracted verbatim from the message) }
     - unknown        → Cannot determine.        params: { reason }
 
     Rules:
