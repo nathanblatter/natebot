@@ -8,6 +8,9 @@ class GoalAction {
     private let reply: ReplyAction
     let reminder: GoalReminder
 
+    /// Set from main.swift to fire KPI side-effects on relevant goal check-ins.
+    var kpiManager: KPIManager?
+
     init(store: GoalStore, claude: ClaudeAPI, reply: ReplyAction, reminder: GoalReminder) {
         self.store    = store
         self.claude   = claude
@@ -110,6 +113,7 @@ class GoalAction {
         }
 
         store.log(goalId: goal.id, source: "nlp", note: note)
+        kpiManager?.handleGoalCheckin(goalName: goal.name)
         var msg = "✅ Logged: \(goal.name)"
         if let n = note, !n.isEmpty { msg += " (\(n))" }
         completion(msg)
@@ -128,6 +132,7 @@ class GoalAction {
             return
         }
         store.log(goalId: goal.id, source: "slash", note: nil)
+        kpiManager?.handleGoalCheckin(goalName: goal.name)
         completion("✅ Logged: \(goal.name)")
     }
 

@@ -47,6 +47,9 @@ enum ParsedCommand {
     case financeGoals
     case financeWatchlist
 
+    // KPI
+    case kpiCommand(subcommand: String, args: [String])
+
     // NLP fallback
     case nlpFallback(String)
 }
@@ -184,6 +187,12 @@ class CommandRouter {
 
         case "/watchlist":
             return .financeWatchlist
+
+        // MARK: /kpi
+        case "/kpi":
+            let sub  = parts.count >= 2 ? parts[1].lowercased() : "help"
+            let args = parts.count >= 3 ? Array(parts.dropFirst(2)) : []
+            return .kpiCommand(subcommand: sub, args: args)
 
         // MARK: /help
         case "/help":

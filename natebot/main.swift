@@ -121,6 +121,13 @@ if let fc = configManager.current.finforge, fc.enabled {
     print("[Boot] FinForge integration enabled — polling \(fc.apiUrl)")
 }
 
+// 6b. KPI tracking (optional — enabled via kpi config)
+var kpiManager: KPIManager? = nil
+if let kc = configManager.current.kpi, kc.enabled {
+    kpiManager = KPIManager(config: kc, claude: claude, reply: replyAction, log: log)
+    print("[Boot] KPI tracking enabled — ingest at \(kc.apiUrl)")
+}
+
 // 7. Routers
 let commandRouter  = CommandRouter()
 let nlpRouter      = NLPRouter(claude: claude)
@@ -386,6 +393,18 @@ func dispatch(_ command: ParsedCommand, rawMessage: String) {
                        action: "finforge_watchlist", result: "ok", reply: reply)
         }
 
+    // MARK: KPI
+    case .kpiCommand(let subcommand, let args):
+        guard let km = kpiManager else {
+            replyAction.send("⚠️ KPI tracking is not enabled.")
+            return
+        }
+        km.handleCommand(subcommand: subcommand, args: args, rawMessage: rawMessage) { reply in
+            replyAction.send(reply)
+            log.append(from: config.trustedSender, message: rawMessage,
+                       action: "kpi_\(subcommand)", result: "ok", reply: reply)
+        }
+
     // MARK: NLP Fallback
     case .nlpFallback(let text):
         nlpRouter.route(text) { result in
@@ -567,6 +586,10 @@ requestEventKitAccess { granted in
 
     // Start message watcher
     let w = MessageWatcher(trustedSender: configManager.current.trustedSender) { rawMessage in
+        // KPI check-in state machine intercepts replies before normal routing
+        if let km = kpiManager, km.handlePendingResponse(rawMessage) {
+            return
+        }
         let command = commandRouter.route(rawMessage)
         dispatch(command, rawMessage: rawMessage)
     }
@@ -576,6 +599,10 @@ requestEventKitAccess { granted in
     // Wire FinForge to monitors and briefing
     proactiveMonitor.finforgeAction = finforgeAction
     morningBriefing.finforgeAction = finforgeAction
+
+    // Wire KPI manager
+    morningBriefing.kpiManager = kpiManager
+    goalAction?.kpiManager = kpiManager
 
     // Start proactive monitors
     proactiveMonitor.start()
@@ -591,6 +618,10 @@ requestEventKitAccess { granted in
 
     // Schedule evening briefing (if configured)
     morningBriefing.scheduleEveningBriefing()
+
+    // Schedule KPI nightly check-in (10 PM) and streak alerts (9 PM)
+    kpiManager?.scheduleNightlyCheckin()
+    kpiManager?.scheduleStreakAlerts()
 
     // Start web UI
     // Wire location tracker to goals for auto-check-in

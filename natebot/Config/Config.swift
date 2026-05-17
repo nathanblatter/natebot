@@ -15,6 +15,7 @@ struct Config: Codable {
     let goalTracking: GoalTrackingConfig?
     let locationTracking: LocationConfig?
     let finforge: FinForgeConfig?
+    let kpi: KPIConfig?
     let webUIPort: Int
     let webUIHost: String
 
@@ -26,7 +27,7 @@ struct Config: Codable {
         case reminderLists = "reminder_lists"
         case goalTracking = "goal_tracking"
         case locationTracking = "location_tracking"
-        case finforge
+        case finforge, kpi
         case webUIPort = "webui_port"
         case webUIHost = "webui_host"
     }
@@ -45,6 +46,7 @@ struct Config: Codable {
         goalTracking  = try c.decodeIfPresent(GoalTrackingConfig.self, forKey: .goalTracking)
         locationTracking = try c.decodeIfPresent(LocationConfig.self, forKey: .locationTracking)
         finforge      = try c.decodeIfPresent(FinForgeConfig.self, forKey: .finforge)
+        kpi           = try c.decodeIfPresent(KPIConfig.self, forKey: .kpi)
         webUIPort     = try c.decodeIfPresent(Int.self, forKey: .webUIPort) ?? 47382
         webUIHost     = try c.decodeIfPresent(String.self, forKey: .webUIHost) ?? "127.0.0.1"
     }
@@ -156,6 +158,20 @@ struct FinForgeConfig: Codable {
         case apiUrl = "api_url"
         case apiKey = "api_key"
         case pollIntervalSeconds = "poll_interval_seconds"
+    }
+}
+
+struct KPIConfig: Codable {
+    let enabled: Bool
+    let apiUrl: String   // "https://nathanblatter.com/api/health-ingest"
+    let apiKey: String
+    let dbUrl: String    // "postgresql://postgres:postgres@localhost:5432/kpi"
+
+    enum CodingKeys: String, CodingKey {
+        case enabled
+        case apiUrl = "api_url"
+        case apiKey = "api_key"
+        case dbUrl  = "db_url"
     }
 }
 

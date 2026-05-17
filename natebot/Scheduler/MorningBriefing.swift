@@ -11,6 +11,7 @@ class MorningBriefing {
     private var scheduledTimer: Timer?
     var locationTracker: LocationTracker?
     var finforgeAction: FinForgeAction?
+    var kpiManager: KPIManager?
 
     init(config: Config, store: EKEventStore, reply: ReplyAction, log: ActivityLog) {
         self.config = config
@@ -65,11 +66,19 @@ class MorningBriefing {
                     self.reply.send(fullBriefing)
                     self.log.append(from: "system", message: "morning_briefing",
                                     action: "briefing", result: "sent", reply: "Briefing sent (with finance)")
+                    // Trigger KPI morning energy check-in after a short pause
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                        self.kpiManager?.sendMorningCheckin()
+                    }
                 }
             } else {
                 self.reply.send(text)
                 self.log.append(from: "system", message: "morning_briefing",
                                 action: "briefing", result: "sent", reply: "Briefing sent")
+                // Trigger KPI morning energy check-in after a short pause
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                    self.kpiManager?.sendMorningCheckin()
+                }
             }
         }
     }
