@@ -60,6 +60,10 @@ class NLPRouter {
                          new_people (int), meaningful_convos (int), ideas_count (int),
                          temple (bool), church (bool), workout_type (string e.g. "Gym")
                        Only include fields the user actually mentioned.
+    - set_timezone   → User wants to change their timezone. Examples: "I'm in Hawaii", \
+                       "set timezone to Portugal", "I just landed in Tokyo", \
+                       "change my timezone to mountain time". \
+                       params: { place (the place/timezone name the user mentioned) }
     - kpi_note       → User wants to log a free-text note or journal entry. Examples: \
                        "add a kpi note that says X", "log a note: X", "note for today: X", \
                        "kpi note X", "add a note saying X". \

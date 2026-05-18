@@ -14,6 +14,8 @@ class GoalReminder {
 
     /// Set from main.swift to add location context to reminders.
     var locationTracker: LocationTracker?
+    /// Set from main.swift — authoritative timezone for all fire-date computation.
+    var timezoneManager: TimezoneManager?
 
     // goalActionProvider is a closure so GoalAction can reference GoalReminder and vice versa
     init(config: GoalTrackingConfig, store: GoalStore, reply: ReplyAction, log: ActivityLog,
@@ -120,16 +122,17 @@ class GoalReminder {
     // MARK: - Date helpers
 
     private func nextDailyFireDate(timeStr: String) -> Date? {
+        if let tm = timezoneManager {
+            return tm.nextDailyFireDate(timeString: timeStr)
+        }
         let parts = timeStr.components(separatedBy: ":")
         guard parts.count == 2,
               let hour = Int(parts[0]),
               let minute = Int(parts[1]) else { return nil }
-
         var comps = Calendar.current.dateComponents([.year, .month, .day], from: Date())
         comps.hour = hour
         comps.minute = minute
         comps.second = 0
-
         guard var fire = Calendar.current.date(from: comps) else { return nil }
         if fire <= Date() {
             fire = Calendar.current.date(byAdding: .day, value: 1, to: fire) ?? fire
@@ -143,7 +146,7 @@ class GoalReminder {
               let hour = Int(parts[0]),
               let minute = Int(parts[1]) else { return nil }
 
-        let cal = Calendar.current
+        let cal = timezoneManager?.calendar ?? Calendar.current
         let targetWeekday = config.weeklySummaryDay + 1  // Calendar: 1=Sunday
 
         var comps = DateComponents()

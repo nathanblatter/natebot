@@ -12,6 +12,7 @@ class MorningBriefing {
     var locationTracker: LocationTracker?
     var finforgeAction: FinForgeAction?
     var kpiManager: KPIManager?
+    var timezoneManager: TimezoneManager?
 
     init(config: Config, store: EKEventStore, reply: ReplyAction, log: ActivityLog) {
         self.config = config
@@ -115,8 +116,9 @@ class MorningBriefing {
             return
         }
 
-        let df = DateFormatter()
-        df.dateFormat = "EEEE, MMMM d"
+        let df = timezoneManager?.formatter(format: "EEEE, MMMM d") ?? {
+            let f = DateFormatter(); f.dateFormat = "EEEE, MMMM d"; return f
+        }()
 
         // Fetch all EventKit data
         let group = DispatchGroup()
@@ -186,8 +188,9 @@ class MorningBriefing {
             if todayEvents.isEmpty {
                 sections.append("  Nothing scheduled")
             } else {
-                let tf = DateFormatter()
-                tf.dateFormat = "h:mm a"
+                let tf = self.timezoneManager?.formatter(format: "h:mm a") ?? {
+                    let f = DateFormatter(); f.dateFormat = "h:mm a"; return f
+                }()
                 for e in todayEvents {
                     sections.append("  • \(tf.string(from: e.startDate)) — \(e.title ?? "Untitled")")
                 }
@@ -210,8 +213,9 @@ class MorningBriefing {
             if upcomingReminders.isEmpty {
                 sections.append("  Nothing upcoming")
             } else {
-                let upDf = DateFormatter()
-                upDf.dateFormat = "MMM d"
+                let upDf = self.timezoneManager?.formatter(format: "MMM d") ?? {
+                    let f = DateFormatter(); f.dateFormat = "MMM d"; return f
+                }()
                 for r in upcomingReminders {
                     var line = "  • \(r.title ?? "Untitled")"
                     if let due = r.dueDateComponents?.date {
@@ -257,19 +261,19 @@ class MorningBriefing {
     }
 
     private func nextFireDate(timeString: String) -> Date? {
+        if let tm = timezoneManager {
+            return tm.nextDailyFireDate(timeString: timeString)
+        }
+        // Fallback: system calendar
         let parts = timeString.components(separatedBy: ":")
         guard parts.count == 2,
               let hour = Int(parts[0]),
               let minute = Int(parts[1]) else { return nil }
-
         var components = Calendar.current.dateComponents([.year, .month, .day], from: Date())
         components.hour   = hour
         components.minute = minute
         components.second = 0
-
         guard var fire = Calendar.current.date(from: components) else { return nil }
-
-        // If today's time has already passed, schedule for tomorrow
         if fire <= Date() {
             fire = Calendar.current.date(byAdding: .day, value: 1, to: fire) ?? fire
         }

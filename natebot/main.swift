@@ -35,6 +35,9 @@ let log        = ActivityLog(maxEntries: configManager.current.log.maxEntries)
 let claude     = ClaudeAPI(apiKey: configManager.current.claudeApiKey)
 let replyAction = ReplyAction(trustedSender: configManager.current.trustedSender, log: log)
 
+// Timezone manager — authoritative timezone for the entire daemon
+let timezoneManager = TimezoneManager(claude: claude)
+
 // 3. Request EventKit access (Calendar + Reminders)
 let eventStore = EKEventStore()
 
@@ -393,6 +396,24 @@ func dispatch(_ command: ParsedCommand, rawMessage: String) {
                        action: "finforge_watchlist", result: "ok", reply: reply)
         }
 
+    // MARK: Timezone
+    case .setTimezone(let place):
+        if place.isEmpty {
+            replyAction.send("Current timezone: \(timezoneManager.displayName)")
+            return
+        }
+        timezoneManager.resolve(placeName: place) { result in
+            switch result {
+            case .success(let tz):
+                let reply = "Timezone set to \(tz.identifier). \(timezoneManager.displayName)"
+                replyAction.send(reply)
+                log.append(from: config.trustedSender, message: rawMessage,
+                           action: "set_timezone", result: "ok", reply: reply)
+            case .failure(let err):
+                replyAction.send("Couldn't resolve '\(place)': \(err.localizedDescription)")
+            }
+        }
+
     // MARK: KPI
     case .kpiCommand(let subcommand, let args):
         guard let km = kpiManager else {
@@ -538,6 +559,11 @@ func dispatchNLP(_ result: NLPResult, rawMessage: String) {
                        action: "finforge_chat", result: "ok", reply: text)
         }
 
+    case "set_timezone":
+        let place = result.params["place"] as? String ?? ""
+        guard !place.isEmpty else { break }
+        dispatch(.setTimezone(place), rawMessage: rawMessage)
+
     case "kpi_log":
         guard let km = kpiManager else {
             replyAction.send("⚠️ KPI tracking is not enabled.")
@@ -648,6 +674,11 @@ requestEventKitAccess { granted in
     // Wire KPI manager
     morningBriefing.kpiManager = kpiManager
     goalAction?.kpiManager = kpiManager
+
+    // Wire timezone manager to all scheduling and formatting components
+    morningBriefing.timezoneManager = timezoneManager
+    goalReminder?.timezoneManager = timezoneManager
+    kpiManager?.timezoneManager = timezoneManager
 
     // Start proactive monitors
     proactiveMonitor.start()

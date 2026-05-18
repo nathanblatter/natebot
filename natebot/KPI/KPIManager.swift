@@ -135,6 +135,9 @@ class KPIManager {
         }
     }
 
+    /// Set from main.swift — authoritative timezone for timestamps and scheduling.
+    var timezoneManager: TimezoneManager?
+
     // MARK: - Public ingest (for NLP kpi_log dispatch in main.swift)
 
     func ingestFields(_ fields: [String: Any]) {
@@ -226,7 +229,7 @@ class KPIManager {
             guard !noteText.isEmpty else {
                 completion("Usage: /kpi note <text>"); return
             }
-            let ts = DateFormatter().apply { $0.dateFormat = "HH:mm" }.string(from: Date())
+            let ts = (timezoneManager?.formatter(format: "HH:mm") ?? DateFormatter().apply { $0.dateFormat = "HH:mm" }).string(from: Date())
             let newEntry = "• [\(ts)] \(noteText)"
             let today = todayString()
 
@@ -580,15 +583,17 @@ class KPIManager {
 
     // MARK: - Scheduling
 
-    /// Schedule a one-shot daily fire at hh:mm local time, then auto-reschedule.
+    /// Schedule a one-shot daily fire at hh:mm in the authoritative timezone, then auto-reschedule.
     private func scheduleDaily(hour: Int, minute: Int, block: @escaping () -> Void) {
-        var comps = Calendar.current.dateComponents([.year, .month, .day], from: Date())
-        comps.hour   = hour
-        comps.minute = minute
-        comps.second = 0
-        guard var fire = Calendar.current.date(from: comps) else { return }
-        if fire <= Date() {
-            fire = Calendar.current.date(byAdding: .day, value: 1, to: fire) ?? fire
+        let fire: Date
+        if let tm = timezoneManager {
+            fire = tm.nextDailyFireDate(hour: hour, minute: minute)
+        } else {
+            var comps = Calendar.current.dateComponents([.year, .month, .day], from: Date())
+            comps.hour = hour; comps.minute = minute; comps.second = 0
+            var d = Calendar.current.date(from: comps) ?? Date()
+            if d <= Date() { d = Calendar.current.date(byAdding: .day, value: 1, to: d) ?? d }
+            fire = d
         }
         let delay = fire.timeIntervalSinceNow
         DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
@@ -600,10 +605,12 @@ class KPIManager {
     // MARK: - Date Helper
 
     private func todayString() -> String {
-        let df = DateFormatter()
-        df.dateFormat = "yyyy-MM-dd"
-        df.locale = Locale(identifier: "en_US_POSIX")
-        return df.string(from: Date())
+        (timezoneManager?.formatter(format: "yyyy-MM-dd") ?? {
+            let df = DateFormatter()
+            df.dateFormat = "yyyy-MM-dd"
+            df.locale = Locale(identifier: "en_US_POSIX")
+            return df
+        }()).string(from: Date())
     }
 }
 

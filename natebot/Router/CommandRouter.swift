@@ -50,6 +50,9 @@ enum ParsedCommand {
     // KPI
     case kpiCommand(subcommand: String, args: [String])
 
+    // Timezone
+    case setTimezone(String)
+
     // NLP fallback
     case nlpFallback(String)
 }
@@ -196,6 +199,11 @@ class CommandRouter {
                 .folding(options: .diacriticInsensitive, locale: .current)
             let args = parts.count >= 3 ? Array(parts.dropFirst(2)) : []
             return .kpiCommand(subcommand: sub, args: args)
+
+        // MARK: /timezone
+        case "/timezone":
+            let place = parts.dropFirst(1).joined(separator: " ")
+            return .setTimezone(place.isEmpty ? "" : place)
 
         // MARK: /help
         case "/help":
