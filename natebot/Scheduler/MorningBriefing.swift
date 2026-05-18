@@ -108,9 +108,10 @@ class MorningBriefing {
     // MARK: - Build briefing content
 
     private func buildBriefing(completion: @escaping (String) -> Void) {
-        let today = Calendar.current.startOfDay(for: Date())
-        guard let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: today),
-              let upcomingEnd = Calendar.current.date(byAdding: .day, value: config.briefing.upcomingDays, to: today)
+        let cal = timezoneManager?.calendar ?? Calendar.current
+        let today = cal.startOfDay(for: Date())
+        guard let tomorrow = cal.date(byAdding: .day, value: 1, to: today),
+              let upcomingEnd = cal.date(byAdding: .day, value: config.briefing.upcomingDays, to: today)
         else {
             completion("⚠️ Could not build briefing — date calculation error.")
             return
@@ -281,8 +282,9 @@ class MorningBriefing {
     }
 
     private func relativeDateString(_ date: Date) -> String {
-        let days = Calendar.current.dateComponents([.day], from: Calendar.current.startOfDay(for: date),
-                                                    to: Calendar.current.startOfDay(for: Date())).day ?? 0
+        let cal = timezoneManager?.calendar ?? Calendar.current
+        let days = cal.dateComponents([.day], from: cal.startOfDay(for: date),
+                                      to: cal.startOfDay(for: Date())).day ?? 0
         switch days {
         case 0: return "today"
         case 1: return "yesterday"

@@ -10,6 +10,8 @@ class GoalAction {
 
     /// Set from main.swift to fire KPI side-effects on relevant goal check-ins.
     var kpiManager: KPIManager?
+    /// Set from main.swift — authoritative timezone for date display.
+    var timezoneManager: TimezoneManager?
 
     init(store: GoalStore, claude: ClaudeAPI, reply: ReplyAction, reminder: GoalReminder) {
         self.store    = store
@@ -147,12 +149,13 @@ class GoalAction {
         let df = DateFormatter()
         df.dateFormat = "EEEE, MMM d"
         var lines = ["🎯 Goals — \(df.string(from: Date()))"]
+        let cal = timezoneManager?.calendar ?? Calendar.current
         for g in goals {
             let done: Bool
             if g.frequency == "weekly" {
-                done = store.isCompletedThisWeek(goalId: g.id)
+                done = store.isCompletedThisWeek(goalId: g.id, calendar: cal)
             } else {
-                done = store.isCompletedToday(goalId: g.id)
+                done = store.isCompletedToday(goalId: g.id, calendar: cal)
             }
             let check = done ? "✅" : "❌"
             var line = "\(check) \(g.name) (\(g.frequency))"
@@ -172,7 +175,7 @@ class GoalAction {
             return
         }
 
-        let cal = Calendar.current
+        let cal = timezoneManager?.calendar ?? Calendar.current
         let today = cal.startOfDay(for: Date())
         var days: [Date] = []
         for i in 0..<7 {

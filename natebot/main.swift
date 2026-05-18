@@ -678,7 +678,10 @@ requestEventKitAccess { granted in
     // Wire timezone manager to all scheduling and formatting components
     morningBriefing.timezoneManager = timezoneManager
     goalReminder?.timezoneManager = timezoneManager
+    goalAction?.timezoneManager = timezoneManager
     kpiManager?.timezoneManager = timezoneManager
+    calendarAction.timezoneManager = timezoneManager
+    reminderAction.timezoneManager = timezoneManager
 
     // Start proactive monitors
     proactiveMonitor.start()

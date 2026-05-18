@@ -7,6 +7,7 @@ class CalendarAction {
     let store: EKEventStore
     let config: Config
     let claude: ClaudeAPI
+    var timezoneManager: TimezoneManager?
 
     init(store: EKEventStore, config: Config, claude: ClaudeAPI) {
         self.store = store
@@ -14,10 +15,33 @@ class CalendarAction {
         self.claude = claude
     }
 
+    /// Current date/time formatted in the authoritative timezone for Claude's "now" reference.
+    private var nowString: String {
+        if let tm = timezoneManager {
+            return tm.formatter(format: "yyyy-MM-dd'T'HH:mm:ssZZZZZ").string(from: Date())
+        }
+        return ISO8601DateFormatter().string(from: Date())
+    }
+
+    /// Parse a no-timezone date string from Claude using the authoritative timezone.
+    private func parseDate(_ s: String) -> Date? {
+        let tz = timezoneManager?.currentTimezone ?? TimeZone.current
+        let df = DateFormatter()
+        df.locale = Locale(identifier: "en_US_POSIX")
+        df.timeZone = tz
+        for fmt in ["yyyy-MM-dd'T'HH:mm:ss", "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd"] {
+            df.dateFormat = fmt
+            if let d = df.date(from: s) { return d }
+        }
+        // Try standard ISO8601 (has timezone offset already)
+        let iso = ISO8601DateFormatter()
+        return iso.date(from: s)
+    }
+
     // MARK: - Add Single Event
 
     func addEvent(details: String, completion: @escaping (String) -> Void) {
-        let now = ISO8601DateFormatter().string(from: Date())
+        let now = nowString
         let systemPrompt = """
         Parse the following text into a single calendar event. Return compact JSON only — no \
         explanation, no markdown.
@@ -50,7 +74,7 @@ class CalendarAction {
     // MARK: - Bulk Parse
 
     func bulkParse(text: String, completion: @escaping (String) -> Void) {
-        let now = ISO8601DateFormatter().string(from: Date())
+        let now = nowString
         let systemPrompt = """
         Extract ALL calendar events from the following text. Return a compact JSON array only.
 
@@ -146,8 +170,8 @@ class CalendarAction {
               let title = json["title"] as? String,
               let startStr = json["start_date"] as? String,
               let endStr   = json["end_date"] as? String,
-              let start = Date.fromClaudeString(startStr),
-              let end   = Date.fromClaudeString(endStr) else { return nil }
+              let start = parseDate(startStr),
+              let end   = parseDate(endStr) else { return nil }
 
         return EventData(
             title: title,
@@ -167,8 +191,8 @@ class CalendarAction {
             guard let title    = json["title"] as? String,
                   let startStr = json["start_date"] as? String,
                   let endStr   = json["end_date"] as? String,
-                  let start    = Date.fromClaudeString(startStr),
-                  let end      = Date.fromClaudeString(endStr) else { return nil }
+                  let start    = parseDate(startStr),
+                  let end      = parseDate(endStr) else { return nil }
             return EventData(title: title, startDate: start, endDate: end,
                              location: json["location"] as? String,
                              notes: json["notes"] as? String)
@@ -197,8 +221,9 @@ class CalendarAction {
 
         do {
             try store.save(ekEvent, span: .thisEvent, commit: true)
-            let df = DateFormatter()
-            df.dateFormat = "MMM d 'at' h:mm a"
+            let df = timezoneManager?.formatter(format: "MMM d 'at' h:mm a") ?? {
+                let f = DateFormatter(); f.dateFormat = "MMM d 'at' h:mm a"; return f
+            }()
             return "✅ Added '\(event.title)' to calendar — \(df.string(from: event.startDate))"
         } catch {
             return "⚠️ Failed to save '\(event.title)': \(error.localizedDescription)"

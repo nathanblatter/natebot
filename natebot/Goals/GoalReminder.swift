@@ -57,11 +57,12 @@ class GoalReminder {
         let item = DispatchWorkItem { [weak self] in
             guard let self = self else { return }
 
+            let cal = self.timezoneManager?.calendar ?? Calendar.current
             let isDone: Bool
             if goal.frequency == "weekly" {
-                isDone = self.store.isCompletedThisWeek(goalId: goal.id)
+                isDone = self.store.isCompletedThisWeek(goalId: goal.id, calendar: cal)
             } else {
-                isDone = self.store.isCompletedToday(goalId: goal.id)
+                isDone = self.store.isCompletedToday(goalId: goal.id, calendar: cal)
             }
 
             if !isDone {

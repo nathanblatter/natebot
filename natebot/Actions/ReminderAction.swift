@@ -7,6 +7,7 @@ class ReminderAction {
     let store: EKEventStore
     let config: Config
     let claude: ClaudeAPI
+    var timezoneManager: TimezoneManager?
 
     init(store: EKEventStore, config: Config, claude: ClaudeAPI) {
         self.store = store
@@ -14,10 +15,29 @@ class ReminderAction {
         self.claude = claude
     }
 
+    private var nowString: String {
+        if let tm = timezoneManager {
+            return tm.formatter(format: "yyyy-MM-dd'T'HH:mm:ssZZZZZ").string(from: Date())
+        }
+        return ISO8601DateFormatter().string(from: Date())
+    }
+
+    private func parseDate(_ s: String) -> Date? {
+        let tz = timezoneManager?.currentTimezone ?? TimeZone.current
+        let df = DateFormatter()
+        df.locale = Locale(identifier: "en_US_POSIX")
+        df.timeZone = tz
+        for fmt in ["yyyy-MM-dd'T'HH:mm:ss", "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd"] {
+            df.dateFormat = fmt
+            if let d = df.date(from: s) { return d }
+        }
+        return ISO8601DateFormatter().date(from: s)
+    }
+
     // MARK: - Add Single Reminder
 
     func addReminder(details: String, completion: @escaping (String) -> Void) {
-        let now = ISO8601DateFormatter().string(from: Date())
+        let now = nowString
         let systemPrompt = """
         Parse the following text into a reminder. Return compact JSON only.
 
@@ -51,7 +71,7 @@ class ReminderAction {
     // MARK: - Bulk Parse
 
     func bulkParse(text: String, completion: @escaping (String) -> Void) {
-        let now = ISO8601DateFormatter().string(from: Date())
+        let now = nowString
         let systemPrompt = """
         Extract ALL reminders/tasks from the following text. Return a compact JSON array only.
 
@@ -171,7 +191,7 @@ class ReminderAction {
               let title = json["title"] as? String else { return nil }
 
         let dueDateStr = json["due_date"] as? String
-        let dueDate = dueDateStr.flatMap { Date.fromClaudeString($0) }
+        let dueDate = dueDateStr.flatMap { parseDate($0) }
         let priorityStr = json["priority"] as? String ?? "none"
         let listStr = json["list"] as? String ?? "default"
 
@@ -191,7 +211,7 @@ class ReminderAction {
         return array.compactMap { json -> ReminderData? in
             guard let title = json["title"] as? String else { return nil }
             let dueDateStr = json["due_date"] as? String
-            let dueDate = dueDateStr.flatMap { Date.fromClaudeString($0) }
+            let dueDate = dueDateStr.flatMap { parseDate($0) }
             let priorityStr = json["priority"] as? String ?? "none"
             let listStr = json["list"] as? String ?? "default"
 

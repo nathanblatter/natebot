@@ -102,8 +102,8 @@ class GoalStore {
         }
     }
 
-    func isCompletedToday(goalId: String) -> Bool {
-        let today = Calendar.current.startOfDay(for: Date())
+    func isCompletedToday(goalId: String, calendar: Calendar = .current) -> Bool {
+        let today = calendar.startOfDay(for: Date())
         return queue.sync {
             checkIns.contains { c in
                 c.goalId == goalId &&
@@ -112,8 +112,8 @@ class GoalStore {
         }
     }
 
-    func isCompletedThisWeek(goalId: String) -> Bool {
-        guard let weekStart = Calendar.current.dateInterval(of: .weekOfYear, for: Date())?.start else {
+    func isCompletedThisWeek(goalId: String, calendar: Calendar = .current) -> Bool {
+        guard let weekStart = calendar.dateInterval(of: .weekOfYear, for: Date())?.start else {
             return false
         }
         return queue.sync {
