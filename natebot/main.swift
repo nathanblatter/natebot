@@ -109,9 +109,8 @@ if let trackingConfig = configManager.current.goalTracking, trackingConfig.enabl
 var locationTracker: LocationTracker? = nil
 
 if let locConfig = configManager.current.locationTracking, locConfig.enabled {
-    let scraper = FindMyLocationScraper()
     locationTracker = LocationTracker(
-        scraper: scraper,
+        dbURL: configManager.current.kpi?.dbUrl ?? "",
         device: locConfig.device,
         namedLocations: locConfig.namedLocations
     )
@@ -323,7 +322,7 @@ func dispatch(_ command: ParsedCommand, rawMessage: String) {
                 let label = e.label ?? e.address
                 replyAction.send("📍 \(e.device): \(label)\n\(e.address)\n\(e.timestamp)")
             } else {
-                replyAction.send("⚠️ Could not get location — Find My may not be running.")
+                replyAction.send("⚠️ Could not read location from database.")
             }
         }
         log.append(from: config.trustedSender, message: rawMessage,
