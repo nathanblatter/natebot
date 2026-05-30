@@ -10,6 +10,7 @@ jobs:
       - name: Deploy
         run: |
           cd /Users/nathanblatter/Desktop/natebot
+          rm -f .git/FETCH_HEAD .git/index.lock
           git pull origin main
           swift build -c release
           launchctl unload ~/Library/LaunchAgents/com.natebot.daemon.plist 2>/dev/null || true
