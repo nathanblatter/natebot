@@ -94,7 +94,7 @@ class LocationTracker {
     func scrapeNow(completion: @escaping (LocationEntry?) -> Void) {
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             guard let self = self else { completion(nil); return }
-            let sql = "SELECT ts, lat, lon, resolved_location, street, city, state FROM location_log ORDER BY ts DESC LIMIT 1"
+            let sql = "SELECT to_char(ts AT TIME ZONE 'UTC', 'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"'), lat, lon, resolved_location, street, city, state FROM location_log ORDER BY ts DESC LIMIT 1"
             guard let csv = self.queryDB(sql: sql),
                   let entry = self.parseRow(csv.components(separatedBy: "\n").first ?? "") else {
                 print("[LocationTracker] No location data in DB")
@@ -108,7 +108,7 @@ class LocationTracker {
 
     /// Latest entry for the configured device.
     func latestEntry() -> LocationEntry? {
-        let sql = "SELECT ts, lat, lon, resolved_location, street, city, state FROM location_log ORDER BY ts DESC LIMIT 1"
+        let sql = "SELECT to_char(ts AT TIME ZONE 'UTC', 'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"'), lat, lon, resolved_location, street, city, state FROM location_log ORDER BY ts DESC LIMIT 1"
         guard let csv = queryDB(sql: sql) else { return nil }
         return parseRow(csv.components(separatedBy: "\n").first ?? "")
     }
@@ -123,7 +123,7 @@ class LocationTracker {
         fmt.formatOptions = [.withInternetDateTime]
         let startStr = fmt.string(from: todayStart)
         let endStr = fmt.string(from: todayEnd)
-        let sql = "SELECT ts, lat, lon, resolved_location, street, city, state FROM location_log WHERE ts >= '\(startStr)' AND ts < '\(endStr)' ORDER BY ts ASC"
+        let sql = "SELECT to_char(ts AT TIME ZONE 'UTC', 'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"'), lat, lon, resolved_location, street, city, state FROM location_log WHERE ts >= '\(startStr)' AND ts < '\(endStr)' ORDER BY ts ASC"
         guard let csv = queryDB(sql: sql) else { return [] }
         return csv.components(separatedBy: "\n").compactMap { parseRow($0) }
     }
@@ -138,7 +138,7 @@ class LocationTracker {
         fmt.formatOptions = [.withInternetDateTime]
         let startStr = fmt.string(from: dayStart)
         let endStr = fmt.string(from: dayEnd)
-        let sql = "SELECT ts, lat, lon, resolved_location, street, city, state FROM location_log WHERE ts >= '\(startStr)' AND ts < '\(endStr)' ORDER BY ts ASC"
+        let sql = "SELECT to_char(ts AT TIME ZONE 'UTC', 'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"'), lat, lon, resolved_location, street, city, state FROM location_log WHERE ts >= '\(startStr)' AND ts < '\(endStr)' ORDER BY ts ASC"
         guard let csv = queryDB(sql: sql) else { return [] }
         return csv.components(separatedBy: "\n").compactMap { parseRow($0) }
     }
