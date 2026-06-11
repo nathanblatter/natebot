@@ -7,13 +7,12 @@ jobs:
   deploy:
     runs-on: self-hosted
     steps:
-      - name: Deploy
-        env:
-          GIT_CONFIG_NOSYSTEM: "1"
+      - uses: actions/checkout@v4
+      - name: Build and deploy
         run: |
-          cd /Users/nathanblatter/Desktop/natebot
-          git pull origin main
-          swift build -c release
+          # Scratch path outside the repo so checkout's git clean doesn't wipe
+          # incremental build state between deploys.
+          swift build -c release --scratch-path /Users/nathanblatter/.natebot-scratch
           launchctl unload ~/Library/LaunchAgents/com.natebot.daemon.plist 2>/dev/null || true
-          cp .build/release/natebot /Users/nathanblatter/.local/bin/natebot
+          cp /Users/nathanblatter/.natebot-scratch/release/natebot /Users/nathanblatter/.local/bin/natebot
           launchctl load ~/Library/LaunchAgents/com.natebot.daemon.plist
