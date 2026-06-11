@@ -11,10 +11,9 @@ private enum PendingCheckin: Equatable {
 // Orchestrates all KPI check-in logic:
 //   Part 1: Morning energy prompt + response
 //   Part 2: Nightly metrics prompt + response
-//   Part 3: Goal check-in side-effects (called from GoalAction)
-//   Part 4: /kpi slash command handler
-//   Part 5: 9 PM streak alerts via psql
-//   Part 6: /kpi query natural-language handler
+//   Part 3: /kpi slash command handler
+//   Part 4: 9 PM streak alerts via psql
+//   Part 5: /kpi query natural-language handler
 
 class KPIManager {
     private let client: KPIClient
@@ -144,31 +143,7 @@ class KPIManager {
         client.ingest(fields)
     }
 
-    // MARK: - Part 3: Goal Check-in Side-Effects
-
-    /// Called from GoalAction after any goal check-in. Posts KPI field if the goal matches.
-    func handleGoalCheckin(goalName: String) {
-        let lower = goalName.lowercased()
-        var fields: [String: Any] = [:]
-
-        if lower.contains("morning prayer") {
-            fields["prayer_am"] = true
-        } else if lower.contains("nighttime prayer") || (lower.contains("night") && lower.contains("prayer")) {
-            fields["prayer_pm"] = true
-        } else if lower.contains("scripture") {
-            fields["scripture"] = true
-        } else if lower.contains("church") {
-            fields["church"] = true
-        } else if lower.contains("gym") {
-            fields["workout_type"] = "Gym"
-        }
-
-        guard !fields.isEmpty else { return }
-        client.ingest(fields)
-        print("[KPIManager] Goal side-effect: \(fields)")
-    }
-
-    // MARK: - Part 4: /kpi Slash Command Handler
+    // MARK: - Part 3: /kpi Slash Command Handler
 
     func handleCommand(subcommand: String, args: [String], rawMessage: String,
                        completion: @escaping (String) -> Void) {
@@ -283,7 +258,7 @@ class KPIManager {
         // Synchronous path already called completion via the ingest callback above.
     }
 
-    // MARK: - Part 5: Streak Alerts (9 PM)
+    // MARK: - Part 4: Streak Alerts (9 PM)
 
     func scheduleStreakAlerts() {
         scheduleDaily(hour: 21, minute: 0) { [weak self] in
@@ -293,7 +268,7 @@ class KPIManager {
 
     private func checkStreaks() {
         let sql = """
-        SELECT date, prayer_am, life_sat, lc_solved, scripture
+        SELECT date, life_sat, lc_solved
         FROM kpi_daily_log
         WHERE date >= CURRENT_DATE - INTERVAL '29 days'
         ORDER BY date DESC;
@@ -314,32 +289,20 @@ class KPIManager {
     }
 
     private func buildStreakAlerts(csv: String) -> [String] {
-        // CSV columns (from --csv --tuples-only): date,prayer_am,life_sat,lc_solved,scripture
+        // CSV columns (from --csv --tuples-only): date,life_sat,lc_solved
         let rows = csv.components(separatedBy: "\n").filter { !$0.isEmpty }
-        var prayerAmVals: [Bool?] = []
-        var lifeSatVals:  [Int?]  = []
-        var lcVals:       [Int?]  = []
-        var scriptureVals:[Bool?] = []
+        var lifeSatVals: [Int?] = []
         var todayHasLC = false
 
         for (i, row) in rows.enumerated() {
             let cols = row.components(separatedBy: ",")
-            let prayerAm  = cols.count > 1 ? parseBool(cols[1]) : nil
-            let lifeSat   = cols.count > 2 ? parseInt(cols[2])  : nil
-            let lc        = cols.count > 3 ? parseInt(cols[3])  : nil
-            let scripture = cols.count > 4 ? parseBool(cols[4]) : nil
-            prayerAmVals.append(prayerAm)
+            let lifeSat = cols.count > 1 ? parseInt(cols[1]) : nil
+            let lc      = cols.count > 2 ? parseInt(cols[2]) : nil
             lifeSatVals.append(lifeSat)
-            lcVals.append(lc)
-            scriptureVals.append(scripture)
             if i == 0 { todayHasLC = lc != nil }
         }
 
         var alerts: [String] = []
-
-        if consecutiveMissing(prayerAmVals, count: 3) {
-            alerts.append("Morning prayer streak broken — 3 days. Want to reset tonight?")
-        }
 
         let loggedSat = lifeSatVals.compactMap { $0 }
         if loggedSat.count >= 3 && isDeclining(Array(loggedSat.prefix(3))) {
@@ -350,14 +313,10 @@ class KPIManager {
             alerts.append("No LC problems logged today — streak at risk.")
         }
 
-        if consecutiveMissing(scriptureVals, count: 3) {
-            alerts.append("Scripture reading streak broken — 3 days.")
-        }
-
         return alerts
     }
 
-    // MARK: - Part 6: NL Query
+    // MARK: - Part 5: NL Query
 
     private func handleNLQuery(question: String, completion: @escaping (String) -> Void) {
         let sql = """
@@ -525,30 +484,10 @@ class KPIManager {
 
     // MARK: - Streak Helpers
 
-    private func consecutiveMissing(_ values: [Bool?], count: Int) -> Bool {
-        var streak = 0
-        for v in values {
-            if v == nil || v == false {
-                streak += 1
-                if streak >= count { return true }
-            } else {
-                break
-            }
-        }
-        return false
-    }
-
     private func isDeclining(_ values: [Int]) -> Bool {
         guard values.count >= 3 else { return false }
         // values[0] is most recent; declining means most recent < previous < one before
         return values[0] < values[1] && values[1] < values[2]
-    }
-
-    private func parseBool(_ s: String) -> Bool? {
-        let t = s.trimmingCharacters(in: .whitespaces).lowercased()
-        if t == "t" || t == "true"  { return true }
-        if t == "f" || t == "false" { return false }
-        return nil
     }
 
     private func parseInt(_ s: String) -> Int? {

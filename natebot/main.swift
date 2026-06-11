@@ -672,7 +672,6 @@ requestEventKitAccess { granted in
 
     // Wire KPI manager
     morningBriefing.kpiManager = kpiManager
-    goalAction?.kpiManager = kpiManager
 
     // Wire timezone manager to all scheduling and formatting components
     morningBriefing.timezoneManager = timezoneManager
