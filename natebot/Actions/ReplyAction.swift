@@ -54,44 +54,67 @@ class ReplyAction {
         🤖 NateBot — Command Reference
 
         📅 CALENDAR
-        /cal add [details] — Add an event
+        /cal [details] — Add a calendar event
         /cal parse [text] — Bulk-add events from text
 
         ✅ REMINDERS
         /remind [details] — Add a reminder
         /remind parse [text] — Bulk-add from text
 
-        📊 STATUS
-        /status — All app health
-        /status [app] — Single app + stats
-
-        💻 SYSTEM
-        /sys — CPU, RAM, Disk
-        /docker — Docker containers
-        /restart [app] [passphrase] — Restart container
-
-        ⏰ SCHEDULER
-        /snooze [30m|1h|2h] — Snooze proactive alerts
-        /briefing — Morning briefing on demand
-
         🎯 GOAL TRACKING
         /goals — Today's status for all goals
-        /goals add [description] — Add a new goal
-        /goals add [description] location:[Place] — Auto-check-in at a location
+        /goals add [description] — Add a new goal (include "at 8am" for reminders, "location:Gym" for auto-check-in)
         /goals remove [goal name] — Remove a goal
         /goals log [goal name] — Log a completion
-        /goals history — This week's completion history
+        /goals history — This week's completion grid
         Or just say "I went for a run" and I'll figure it out!
 
+        📈 KPI / HEALTH
+        /kpi energy <1-10> — Morning energy
+        /kpi sat <1-10> — Life satisfaction
+        /kpi lc <n> — LeetCode problems solved
+        /kpi met <n> — New people met
+        /kpi ideas <n> — Ideas generated
+        /kpi temple — Log temple attendance
+        /kpi church — Log church attendance
+        /kpi note <text> — Append a daily note
+        /kpi status — Today's KPI snapshot
+        /kpi week — Last 7 days summary
+        /kpi query <question> — Ask anything about your data
+        Or just say "I'm at a 9 for energy" and I'll log it!
+
         📍 LOCATION
-        /location — Current iPhone location
+        /location — Current location
         /location history — Today's location summary
 
+        💻 SYSTEM
+        /sys — CPU, RAM, Disk usage
+        /docker — Docker container status
+        /restart [app] [passphrase] — Restart a container
+
+        📊 STATUS
+        /status — All monitored app health
+        /status [app] — Single app status
+
+        ⏰ SCHEDULING
+        /briefing — Morning briefing on demand
+        /snooze [30m|1h|2h] — Snooze proactive alerts
+
+        💰 FINANCE
+        /finance — Daily finance briefing
+        /portfolio — Portfolio snapshot
+        /predict [SYMBOL] — Price prediction
+        /fingoals — Financial goals
+        /watchlist — Watchlist summary
+
+        🌍 TIMEZONE
+        /timezone [place] — Set your current timezone
+
         📋 MISC
-        /log — Last 10 activity entries
+        /log — Last 10 activity log entries
         /help — This message
 
-        💬 Or just say what you need naturally!
+        💬 Or just talk naturally — I'll figure it out!
         """
         send(help)
     }

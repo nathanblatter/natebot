@@ -18,10 +18,13 @@ enum WebUI {
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: var(--bg); color: var(--text); font-family: -apple-system, monospace; font-size: 14px; }
   #app { display: flex; flex-direction: column; height: 100vh; }
-  nav { display: flex; background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 16px; gap: 4px; }
+  nav { display: flex; background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 16px; gap: 4px; align-items: center; }
   nav button { background: none; border: none; color: var(--muted); cursor: pointer; padding: 12px 16px; font-size: 14px; border-bottom: 2px solid transparent; }
   nav button.active { color: var(--accent); border-bottom-color: var(--accent); }
   nav button:hover { color: var(--text); }
+  nav a.nav-link { color: var(--muted); text-decoration: none; padding: 12px 16px; font-size: 14px; border-bottom: 2px solid transparent; }
+  nav a.nav-link:hover { color: var(--text); }
+  nav .nav-spacer { flex: 1; }
   main { flex: 1; overflow-y: auto; padding: 20px; }
   .tab { display: none; } .tab.active { display: block; }
   h2 { font-size: 16px; font-weight: 600; margin-bottom: 16px; color: var(--text); }
@@ -91,6 +94,8 @@ enum WebUI {
     <button onclick="switchTab('calendar')">Calendar</button>
     <button onclick="switchTab('reminders')">Reminders</button>
     <button onclick="switchTab('location')">Location</button>
+    <div class="nav-spacer"></div>
+    <a class="nav-link" href="http://100.79.61.79:47382" target="_blank">↗ KPI Dashboard</a>
   </nav>
   <main>
 
