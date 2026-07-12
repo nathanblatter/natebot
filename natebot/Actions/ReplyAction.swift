@@ -61,14 +61,6 @@ class ReplyAction {
         /remind [details] — Add a reminder
         /remind parse [text] — Bulk-add from text
 
-        🎯 GOAL TRACKING
-        /goals — Today's status for all goals
-        /goals add [description] — Add a new goal (include "at 8am" for reminders, "location:Gym" for auto-check-in)
-        /goals remove [goal name] — Remove a goal
-        /goals log [goal name] — Log a completion
-        /goals history — This week's completion grid
-        Or just say "I went for a run" and I'll figure it out!
-
         📈 KPI / HEALTH
         /kpi energy <1-10> — Morning energy
         /kpi sat <1-10> — Life satisfaction

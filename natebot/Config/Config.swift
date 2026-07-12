@@ -12,7 +12,6 @@ struct Config: Codable {
     let monitors: [MonitorConfig]
     let calendars: CalendarConfig
     let reminderLists: ReminderListConfig
-    let goalTracking: GoalTrackingConfig?
     let locationTracking: LocationConfig?
     let finforge: FinForgeConfig?
     let kpi: KPIConfig?
@@ -25,7 +24,6 @@ struct Config: Codable {
         case claudeApiKey = "claude_api_key"
         case briefing, log, apps, monitors, calendars
         case reminderLists = "reminder_lists"
-        case goalTracking = "goal_tracking"
         case locationTracking = "location_tracking"
         case finforge, kpi
         case webUIPort = "webui_port"
@@ -43,7 +41,6 @@ struct Config: Codable {
         monitors      = try c.decode([MonitorConfig].self, forKey: .monitors)
         calendars     = try c.decode(CalendarConfig.self, forKey: .calendars)
         reminderLists = try c.decode(ReminderListConfig.self, forKey: .reminderLists)
-        goalTracking  = try c.decodeIfPresent(GoalTrackingConfig.self, forKey: .goalTracking)
         locationTracking = try c.decodeIfPresent(LocationConfig.self, forKey: .locationTracking)
         finforge      = try c.decodeIfPresent(FinForgeConfig.self, forKey: .finforge)
         kpi           = try c.decodeIfPresent(KPIConfig.self, forKey: .kpi)
@@ -132,18 +129,6 @@ struct ReminderListConfig: Codable {
     enum CodingKeys: String, CodingKey {
         case defaultList = "default"
         case work, school
-    }
-}
-
-struct GoalTrackingConfig: Codable {
-    let enabled: Bool
-    let weeklySummaryDay: Int    // 0=Sunday
-    let weeklySummaryTime: String // "14:00"
-
-    enum CodingKeys: String, CodingKey {
-        case enabled
-        case weeklySummaryDay = "weekly_summary_day"
-        case weeklySummaryTime = "weekly_summary_time"
     }
 }
 

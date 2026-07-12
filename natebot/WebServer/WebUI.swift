@@ -62,9 +62,6 @@ enum WebUI {
   .spacer { flex: 1; }
   label { color: var(--muted); font-size: 12px; display: block; margin-bottom: 4px; margin-top: 10px; }
   .form-section { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 20px; }
-  .heatmap { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 8px; }
-  .heatmap-cell { width: 14px; height: 14px; border-radius: 2px; background: var(--border); }
-  .heatmap-cell.done { background: var(--green); }
   pre { background: var(--surface); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 12px; }
   .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .6s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
@@ -90,7 +87,6 @@ enum WebUI {
     <button class="active" onclick="switchTab('dashboard')">Dashboard</button>
     <button onclick="switchTab('log')">Activity Log</button>
     <button onclick="switchTab('config')">Config</button>
-    <button onclick="switchTab('goals')">Goals</button>
     <button onclick="switchTab('calendar')">Calendar</button>
     <button onclick="switchTab('reminders')">Reminders</button>
     <button onclick="switchTab('location')">Location</button>
@@ -176,23 +172,6 @@ enum WebUI {
         <h3>Raw JSON</h3>
         <textarea id="cfg-raw" rows="20" oninput="onRawEdit()"></textarea>
       </div>
-    </div>
-
-    <!-- GOALS -->
-    <div id="tab-goals" class="tab">
-      <div class="section-head"><h2>Goals</h2></div>
-      <div class="card">
-        <h3>Add Goal</h3>
-        <div class="row">
-          <div><label style="margin:0">Name</label><input id="goal-name" placeholder="Morning Prayer"></div>
-          <div><label style="margin:0">Frequency</label>
-            <select id="goal-freq"><option value="daily">Daily</option><option value="weekly">Weekly</option></select></div>
-          <div><label style="margin:0">Reminder (HH:MM)</label><input id="goal-rt" placeholder="optional"></div>
-          <div><label style="margin:0">Location</label><input id="goal-loc" placeholder="e.g. Gym"></div>
-          <button class="btn" onclick="addGoal()">Add</button>
-        </div>
-      </div>
-      <div id="goals-list"></div>
     </div>
 
     <!-- CALENDAR -->
@@ -298,7 +277,6 @@ const loaders = {
   dashboard: loadDashboard,
   log: loadLog,
   config: loadConfig,
-  goals: loadGoals,
   calendar: loadCalendar,
   reminders: loadReminders,
   location: loadLocation,
@@ -419,88 +397,6 @@ async function saveConfig() {
 }
 
 let _currentCfg = {};
-
-// ── Goals ──────────────────────────────────────────────────────────────────
-
-async function loadGoals() {
-  const [goals, checkins] = await Promise.all([
-    api('GET', '/api/goals'),
-    api('GET', '/api/goals/checkins'),
-  ]);
-  const gl = document.getElementById('goals-list');
-  if (!goals || goals.length === 0) { gl.innerHTML = '<div class="empty">No goals yet.</div>'; return; }
-
-  gl.innerHTML = goals.map(g => {
-    const myCheckins = (checkins || []).filter(c => c.goal_id === g.id);
-    const days = last7days();
-    const cells = days.map(d => {
-      const done = myCheckins.some(c => sameDay(c.timestamp, d));
-      return `<div class="heatmap-cell ${done ? 'done' : ''}" title="${d}"></div>`;
-    }).join('');
-    return `<div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div>
-          <strong>${esc(g.name)}</strong>
-          <span class="badge" style="margin-left:8px">${g.frequency}</span>
-          ${g.reminder_time ? `<span class="badge" style="margin-left:4px">⏰ ${g.reminder_time}</span>` : ''}
-          ${g.location ? `<span class="badge" style="margin-left:4px;background:#1e3a5f;color:#93c5fd">📍 ${g.location}</span>` : ''}
-        </div>
-        <div style="display:flex;gap:8px">
-          <button class="btn-sm" onclick="checkinGoal('${g.id}','${esc(g.name)}')">Check In</button>
-          <button class="btn-sm btn-red" onclick="deleteGoal('${g.id}')">Delete</button>
-        </div>
-      </div>
-      <div class="stat-label" style="margin-top:8px">Last 7 days</div>
-      <div class="heatmap">${cells}</div>
-    </div>`;
-  }).join('');
-}
-
-function last7days() {
-  const days = [];
-  for (let i = 6; i >= 0; i--) {
-    const d = new Date(); d.setDate(d.getDate() - i);
-    days.push(d.toISOString().slice(0, 10));
-  }
-  return days;
-}
-
-function sameDay(iso, dateStr) {
-  return (iso || '').slice(0, 10) === dateStr;
-}
-
-async function addGoal() {
-  const name = document.getElementById('goal-name').value.trim();
-  const freq = document.getElementById('goal-freq').value;
-  const rt   = document.getElementById('goal-rt').value.trim();
-  const loc  = document.getElementById('goal-loc').value.trim();
-  if (!name) { showToast('Enter a goal name', true); return; }
-  const body = { name, frequency: freq };
-  if (rt) body.reminder_time = rt;
-  if (loc) body.location = loc;
-  const r = await api('POST', '/api/goals', body);
-  if (r.id) {
-    showToast('Goal added');
-    document.getElementById('goal-name').value = '';
-    document.getElementById('goal-rt').value = '';
-    document.getElementById('goal-loc').value = '';
-    loadGoals();
-  } else showToast('Failed: ' + (r.error || ''), true);
-}
-
-async function deleteGoal(id) {
-  if (!confirm('Delete this goal?')) return;
-  const r = await api('DELETE', '/api/goals/' + id);
-  if (r.status === 'ok') { showToast('Deleted'); loadGoals(); }
-  else showToast('Failed: ' + (r.error || ''), true);
-}
-
-async function checkinGoal(id, name) {
-  const note = prompt('Note (optional) for: ' + name) ?? null;
-  const r = await api('POST', '/api/goals/' + id + '/checkin', { note: note || undefined });
-  if (r.status === 'ok') { showToast('Checked in!'); loadGoals(); }
-  else showToast('Failed', true);
-}
 
 // ── Calendar ───────────────────────────────────────────────────────────────
 

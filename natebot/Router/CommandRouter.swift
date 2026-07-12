@@ -29,12 +29,6 @@ enum ParsedCommand {
     case log
     case help
 
-    // Goals
-    case goalsStatus
-    case goalsAdd(String)
-    case goalsRemove(String)
-    case goalsLog(String)
-    case goalsHistory
 
     // Location
     case locationCurrent
@@ -147,25 +141,6 @@ class CommandRouter {
         // MARK: /log
         case "/log":
             return .log
-
-        // MARK: /goals
-        case "/goals":
-            guard parts.count >= 2 else { return .goalsStatus }
-            let sub  = parts[1].lowercased()
-            let rest = parts.dropFirst(2).joined(separator: " ")
-
-            switch sub {
-            case "add":
-                return .goalsAdd(rest)
-            case "remove", "delete", "rm":
-                return .goalsRemove(rest)
-            case "log", "done", "check":
-                return .goalsLog(rest)
-            case "history":
-                return .goalsHistory
-            default:
-                return .goalsStatus
-            }
 
         // MARK: /location
         case "/location":

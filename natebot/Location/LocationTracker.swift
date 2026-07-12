@@ -19,10 +19,6 @@ class LocationTracker {
     private let device: String
     private let namedLocations: [String: String]
 
-    /// Set from main.swift to enable location-based goal auto-check-in.
-    var goalStore: GoalStore?
-    var reply: ReplyAction?
-
     init(dbURL: String, device: String, namedLocations: [String: String]) {
         self.dbURL = dbURL
         self.device = device
@@ -55,10 +51,7 @@ class LocationTracker {
     }
 
     private func fireAndReschedule() {
-        scrapeNow { [weak self] entry in
-            if let entry = entry {
-                self?.checkGoalAutoComplete(for: entry)
-            }
+        scrapeNow { [weak self] _ in
             self?.scheduleNext()
         }
     }
@@ -141,25 +134,6 @@ class LocationTracker {
         let sql = "SELECT to_char(ts AT TIME ZONE 'UTC', 'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"'), lat, lon, resolved_location, street, city, state FROM location_log WHERE ts >= '\(startStr)' AND ts < '\(endStr)' ORDER BY ts ASC"
         guard let csv = queryDB(sql: sql) else { return [] }
         return csv.components(separatedBy: "\n").compactMap { parseRow($0) }
-    }
-
-    // MARK: - Goal Auto-Check-In
-
-    private func checkGoalAutoComplete(for entry: LocationEntry) {
-        guard let store = goalStore, let label = entry.label else { return }
-        let goals = store.listGoals()
-        for goal in goals {
-            guard let goalLocation = goal.location,
-                  goalLocation.lowercased() == label.lowercased() else { continue }
-            let alreadyDone = goal.frequency == "weekly"
-                ? store.isCompletedThisWeek(goalId: goal.id)
-                : store.isCompletedToday(goalId: goal.id)
-            guard !alreadyDone else { continue }
-            store.log(goalId: goal.id, source: "location", note: "Auto: detected at \(label)")
-            let msg = "📍✅ Auto-checked in: \(goal.name) (you're at \(label))"
-            print("[LocationTracker] \(msg)")
-            reply?.send(msg)
-        }
     }
 
     // MARK: - Label Resolution

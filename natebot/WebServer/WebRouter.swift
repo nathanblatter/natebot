@@ -7,7 +7,6 @@ import NIOHTTP1
 final class WebRouter {
     private let configManager: ConfigManager
     private let log: ActivityLog
-    private let goalStore: GoalStore?
     private let locationTracker: LocationTracker?
     private let calendarAction: CalendarAction
     private let reminderAction: ReminderAction
@@ -19,7 +18,6 @@ final class WebRouter {
     init(
         configManager: ConfigManager,
         log: ActivityLog,
-        goalStore: GoalStore?,
         locationTracker: LocationTracker?,
         calendarAction: CalendarAction,
         reminderAction: ReminderAction,
@@ -28,7 +26,6 @@ final class WebRouter {
     ) {
         self.configManager   = configManager
         self.log             = log
-        self.goalStore       = goalStore
         self.locationTracker = locationTracker
         self.calendarAction  = calendarAction
         self.reminderAction  = reminderAction
@@ -100,65 +97,6 @@ final class WebRouter {
                  "action": e.action, "result": e.result, "reply": e.reply]
             }
             json(arr)
-            return
-        }
-
-        // ── Goals ─────────────────────────────────────────────────────────────
-        if path == "/api/goals" {
-            if method == .GET {
-                guard let gs = goalStore else { json([]); return }
-                let goals = gs.listGoals().map { g -> [String: Any] in
-                    var d: [String: Any] = ["id": g.id, "name": g.name, "frequency": g.frequency, "created_at": g.createdAt]
-                    if let t = g.reminderTime { d["reminder_time"] = t }
-                    if let loc = g.location { d["location"] = loc }
-                    return d
-                }
-                json(goals)
-                return
-            }
-            if method == .POST {
-                guard let gs = goalStore,
-                      let body = try? JSONSerialization.jsonObject(with: body) as? [String: Any],
-                      let name = body["name"] as? String,
-                      let freq = body["frequency"] as? String else {
-                    errResp("missing name or frequency"); return
-                }
-                let rt = body["reminder_time"] as? String
-                let loc = body["location"] as? String
-                let goal = gs.addGoal(name: name, frequency: freq, reminderTime: rt, location: loc)
-                json(["id": goal.id, "name": goal.name, "frequency": goal.frequency])
-                return
-            }
-        }
-
-        if path == "/api/goals/checkins" && method == .GET {
-            guard let gs = goalStore else { json([]); return }
-            let checkins = gs.listAllCheckIns().map { c -> [String: Any] in
-                var d: [String: Any] = ["id": c.id, "goal_id": c.goalId,
-                                        "timestamp": c.timestamp, "source": c.source]
-                if let n = c.note { d["note"] = n }
-                return d
-            }
-            json(checkins)
-            return
-        }
-
-        // /api/goals/:id  (DELETE)
-        if method == .DELETE && path.hasPrefix("/api/goals/") && !path.hasPrefix("/api/goals/checkins") {
-            let id = String(path.dropFirst("/api/goals/".count))
-            guard let gs = goalStore else { errResp("goal tracking disabled"); return }
-            if gs.removeGoal(id: id) { ok() } else { errResp("not found", status: 404) }
-            return
-        }
-
-        // /api/goals/:id/checkin  (POST)
-        if method == .POST && path.hasSuffix("/checkin") && path.hasPrefix("/api/goals/") {
-            let middle = path.dropFirst("/api/goals/".count).dropLast("/checkin".count)
-            let goalId = String(middle)
-            guard let gs = goalStore else { errResp("goal tracking disabled"); return }
-            let note = (try? JSONSerialization.jsonObject(with: body) as? [String: Any])?["note"] as? String
-            gs.log(goalId: goalId, source: "webui", note: note)
-            ok()
             return
         }
 

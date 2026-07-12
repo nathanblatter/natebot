@@ -83,28 +83,6 @@ let reminderAction = ReminderAction(store: eventStore, config: configManager.cur
 let statusAction   = StatusAction(apps: configManager.current.apps)
 let systemAction   = SystemAction(config: configManager.current, reply: replyAction)
 
-// Goal tracking (optional — enabled via goal_tracking config)
-var goalAction: GoalAction? = nil
-var goalReminder: GoalReminder? = nil
-var sharedGoalStore: GoalStore? = nil
-
-if let trackingConfig = configManager.current.goalTracking, trackingConfig.enabled {
-    let goalStore = GoalStore()
-    sharedGoalStore = goalStore
-    var goalActionBox: GoalAction? = nil
-    let reminder = GoalReminder(
-        config: trackingConfig,
-        store: goalStore,
-        reply: replyAction,
-        log: log,
-        goalActionProvider: { goalActionBox }
-    )
-    let action = GoalAction(store: goalStore, claude: claude, reply: replyAction, reminder: reminder)
-    goalActionBox = action
-    goalAction = action
-    goalReminder = reminder
-}
-
 // 5. Location tracking (optional — enabled via location_tracking config)
 var locationTracker: LocationTracker? = nil
 
@@ -254,62 +232,6 @@ func dispatch(_ command: ParsedCommand, rawMessage: String) {
         replyAction.sendHelp()
         log.append(from: config.trustedSender, message: rawMessage,
                    action: "help", result: "ok", reply: "Help sent")
-
-    // MARK: Goals
-    case .goalsStatus:
-        guard let ga = goalAction else {
-            replyAction.send("⚠️ Goal tracking is not enabled.")
-            return
-        }
-        ga.handleStatus { reply in
-            replyAction.send(reply)
-            log.append(from: config.trustedSender, message: rawMessage,
-                       action: "goals_status", result: "ok", reply: reply)
-        }
-
-    case .goalsAdd(let text):
-        guard let ga = goalAction else {
-            replyAction.send("⚠️ Goal tracking is not enabled.")
-            return
-        }
-        ga.handleAdd(rawText: text) { reply in
-            replyAction.send(reply)
-            log.append(from: config.trustedSender, message: rawMessage,
-                       action: "goals_add", result: reply.hasPrefix("✅") ? "success" : "error", reply: reply)
-        }
-
-    case .goalsRemove(let text):
-        guard let ga = goalAction else {
-            replyAction.send("⚠️ Goal tracking is not enabled.")
-            return
-        }
-        ga.handleRemove(rawText: text) { reply in
-            replyAction.send(reply)
-            log.append(from: config.trustedSender, message: rawMessage,
-                       action: "goals_remove", result: reply.hasPrefix("✅") ? "success" : "error", reply: reply)
-        }
-
-    case .goalsLog(let text):
-        guard let ga = goalAction else {
-            replyAction.send("⚠️ Goal tracking is not enabled.")
-            return
-        }
-        ga.handleSlashCheckin(rawText: text) { reply in
-            replyAction.send(reply)
-            log.append(from: config.trustedSender, message: rawMessage,
-                       action: "goals_log", result: reply.hasPrefix("✅") ? "success" : "error", reply: reply)
-        }
-
-    case .goalsHistory:
-        guard let ga = goalAction else {
-            replyAction.send("⚠️ Goal tracking is not enabled.")
-            return
-        }
-        ga.handleHistory { reply in
-            replyAction.send(reply)
-            log.append(from: config.trustedSender, message: rawMessage,
-                       action: "goals_history", result: "ok", reply: reply)
-        }
 
     // MARK: Location
     case .locationCurrent:
@@ -483,31 +405,6 @@ func dispatchNLP(_ result: NLPResult, rawMessage: String) {
     case "help":
         dispatch(.help, rawMessage: rawMessage)
 
-    case "goal_checkin":
-        guard let ga = goalAction else { break }
-        let goalName = result.params["goal_name"] as? String ?? rawMessage
-        let note = result.params["note"] as? String
-        ga.handleCheckin(rawMessage: rawMessage, goalName: goalName, note: note) { reply in
-            replyAction.send(reply)
-            log.append(from: config.trustedSender, message: rawMessage,
-                       action: "goal_checkin", result: reply.hasPrefix("✅") ? "success" : "error", reply: reply)
-        }
-
-    case "goal_add":
-        guard let ga = goalAction else { break }
-        let name = result.params["name"] as? String ?? ""
-        let freq = result.params["frequency"] as? String ?? "daily"
-        let reminderTime = result.params["reminder_time"] as? String
-        let location = result.params["location"] as? String
-        let addedGoal = ga.store.addGoal(name: name, frequency: freq, reminderTime: reminderTime, location: location)
-        ga.reminder.reschedule()
-        var reply = "✅ Goal added: \"\(addedGoal.name)\" (\(addedGoal.frequency))"
-        if let t = addedGoal.reminderTime { reply += " — reminder at \(t)" }
-        if let loc = addedGoal.location { reply += " — 📍 auto-check-in at \(loc)" }
-        replyAction.send(reply)
-        log.append(from: config.trustedSender, message: rawMessage,
-                   action: "goal_add", result: "success", reply: reply)
-
     case "finforge_briefing":
         guard let ff = finforgeAction else { break }
         ff.briefing { text in
@@ -675,8 +572,6 @@ requestEventKitAccess { granted in
 
     // Wire timezone manager to all scheduling and formatting components
     morningBriefing.timezoneManager = timezoneManager
-    goalReminder?.timezoneManager = timezoneManager
-    goalAction?.timezoneManager = timezoneManager
     kpiManager?.timezoneManager = timezoneManager
     calendarAction.timezoneManager = timezoneManager
     reminderAction.timezoneManager = timezoneManager
@@ -686,9 +581,6 @@ requestEventKitAccess { granted in
 
     // Schedule morning briefing
     morningBriefing.scheduleDailyBriefing()
-
-    // Schedule goal reminders
-    goalReminder?.scheduleAllReminders()
 
     // Start location tracking
     locationTracker?.startTracking()
@@ -700,21 +592,12 @@ requestEventKitAccess { granted in
     kpiManager?.scheduleNightlyCheckin()
     kpiManager?.scheduleStreakAlerts()
 
-    // Start web UI
-    // Wire location tracker to goals for auto-check-in
-    locationTracker?.goalStore = sharedGoalStore
-    locationTracker?.reply = replyAction
-
-    // Wire location tracker to goal reminders for location context
-    goalReminder?.locationTracker = locationTracker
-
     // Pass location tracker to morning briefing for evening summaries
     morningBriefing.locationTracker = locationTracker
 
     let webRouter = WebRouter(
         configManager: configManager,
         log: log,
-        goalStore: sharedGoalStore,
         locationTracker: locationTracker,
         calendarAction: calendarAction,
         reminderAction: reminderAction,

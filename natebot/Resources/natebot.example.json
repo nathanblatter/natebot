@@ -40,11 +40,6 @@
     "work": "Work",
     "school": "School"
   },
-  "goal_tracking": {
-    "enabled": true,
-    "weekly_summary_day": 0,
-    "weekly_summary_time": "14:00"
-  },
   "location_tracking": {
     "enabled": false,
     "device": "iPhone",

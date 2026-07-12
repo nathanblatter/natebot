@@ -35,12 +35,6 @@ class NLPRouter {
     - briefing       → Morning briefing.        params: {}
     - log            → Recent activity log.     params: {}
     - help           → Help message.            params: {}
-    - goal_checkin   → User is reporting they completed a personal goal (e.g. "I prayed this morning", "finished my run").
-                       params: { goal_name (string matching one of their goals, e.g. "morning prayer", "run"),
-                                 note? (any extra context, e.g. "for 20 mins") }
-    - goal_add       → User wants to add a new personal goal.
-                       params: { name (string, title-cased, 2-5 words), frequency ("daily"|"weekly"),
-                                 reminder_time? ("HH:MM" 24h format, include only if user mentions a time) }
     - finforge_briefing  → user wants a financial summary, asks about money/finances/net worth.   params: {}
     - finforge_portfolio → user asks about stocks, holdings, portfolio, investments.              params: {}
     - finforge_predict   → user asks about risk or prediction for a specific ticker.
@@ -50,7 +44,7 @@ class NLPRouter {
     - finforge_chat      → user asks any other finance question that needs detailed analysis.
                            params: { message (the original question) }
     - kpi_log        → User is reporting a personal health/productivity metric in freeform text \
-                       (NOT a goal check-in, NOT a note/journal entry). Examples: "I'm at a 9 \
+                       (NOT a note/journal entry). Examples: "I'm at a 9 \
                        for life satisfaction", "my energy is 6 this morning", "I solved 4 \
                        leetcode problems", "I met 3 new people today", "I had 2 meaningful \
                        conversations", "I came up with 5 ideas", "I went to the temple", \
@@ -75,8 +69,6 @@ class NLPRouter {
     - Format: {"action":"action_name","params":{...}}
     - For cal_parse / remind_parse, set params.text to the full original message.
     - For status_single, match app_name to common names (e.g. "survivor", "therapist", "codenames").
-    - Prefer kpi_log over goal_checkin when the user is reporting a measurable value (number, rating).
-    - Prefer goal_checkin when the user says they completed a habitual activity with no numeric value.
     """
 
     init(claude: ClaudeAPI) {
