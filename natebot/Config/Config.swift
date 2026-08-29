@@ -5,6 +5,9 @@ import Foundation
 struct Config: Codable {
     let trustedSender: String
     let passphrase: String
+    /// Auth token for POST /api/chat (Apple Shortcuts webhook). Optional —
+    /// falls back to the passphrase when absent.
+    let chatToken: String?
     let claudeApiKey: String
     let briefing: BriefingConfig
     let log: LogConfig
@@ -21,6 +24,7 @@ struct Config: Codable {
     enum CodingKeys: String, CodingKey {
         case trustedSender = "trusted_sender"
         case passphrase
+        case chatToken = "chat_token"
         case claudeApiKey = "claude_api_key"
         case briefing, log, apps, monitors, calendars
         case reminderLists = "reminder_lists"
@@ -34,6 +38,7 @@ struct Config: Codable {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         trustedSender = try c.decode(String.self, forKey: .trustedSender)
         passphrase    = try c.decode(String.self, forKey: .passphrase)
+        chatToken     = try c.decodeIfPresent(String.self, forKey: .chatToken)
         claudeApiKey  = try c.decode(String.self, forKey: .claudeApiKey)
         briefing      = try c.decode(BriefingConfig.self, forKey: .briefing)
         log           = try c.decode(LogConfig.self, forKey: .log)

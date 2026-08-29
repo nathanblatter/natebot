@@ -12,6 +12,7 @@ final class WebRouter {
     private let reminderAction: ReminderAction
     private let statusAction: StatusAction
     private let systemAction: SystemAction
+    private let brain: BrainSession
 
     typealias ResponseCallback = (_ statusCode: Int, _ headers: [(String, String)], _ body: Data) -> Void
 
@@ -22,7 +23,8 @@ final class WebRouter {
         calendarAction: CalendarAction,
         reminderAction: ReminderAction,
         statusAction: StatusAction,
-        systemAction: SystemAction
+        systemAction: SystemAction,
+        brain: BrainSession
     ) {
         self.configManager   = configManager
         self.log             = log
@@ -31,6 +33,7 @@ final class WebRouter {
         self.reminderAction  = reminderAction
         self.statusAction    = statusAction
         self.systemAction    = systemAction
+        self.brain           = brain
     }
 
     // MARK: - Dispatch
@@ -64,6 +67,47 @@ final class WebRouter {
         if method == .GET && path == "/" {
             let html = WebUI.html
             completion(200, [("content-type", "text/html; charset=utf-8")], Data(html.utf8))
+            return
+        }
+
+        // ── Chat (Apple Shortcuts webhook) ───────────────────────────────────
+        // Text: POST /api/chat {"message": "..."}. Voice: POST raw audio body
+        // with an audio/* content-type. Auth: X-API-Key or Bearer token
+        // (chat_token in config, falling back to the passphrase). Responds 202
+        // immediately — the brain's reply arrives over iMessage.
+        if method == .POST && path == "/api/chat" {
+            let token = configManager.current.chatToken ?? configManager.current.passphrase
+            let provided = head.headers.first(name: "x-api-key")
+                ?? head.headers.first(name: "authorization").map { $0.replacingOccurrences(of: "Bearer ", with: "") }
+            guard provided == token else {
+                errResp("unauthorized", status: 401)
+                return
+            }
+
+            let contentType = head.headers.first(name: "content-type") ?? ""
+            if contentType.hasPrefix("audio/") || contentType == "application/octet-stream" {
+                guard !body.isEmpty else { errResp("empty audio body"); return }
+                let ext = contentType.contains("wav") ? "wav" : contentType.contains("mp4") || contentType.contains("m4a") ? "m4a" : "caf"
+                let tmp = NSTemporaryDirectory() + "natebot-chat-\(UUID().uuidString.prefix(8)).\(ext)"
+                do {
+                    try body.write(to: URL(fileURLWithPath: tmp))
+                } catch {
+                    errResp("could not save audio: \(error.localizedDescription)", status: 500)
+                    return
+                }
+                brain.handle("", attachments: [InboundAttachment(path: tmp, mime: contentType)])
+                json(["status": "processing", "note": "reply will arrive via iMessage"], status: 202)
+                return
+            }
+
+            guard let obj = try? JSONSerialization.jsonObject(with: body) as? [String: Any],
+                  let message = obj["message"] as? String,
+                  !message.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+                errResp("missing message")
+                return
+            }
+            brain.handle(message)
+            json(["status": "processing", "note": "reply will arrive via iMessage"], status: 202)
             return
         }
 

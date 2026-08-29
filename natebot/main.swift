@@ -142,11 +142,11 @@ requestEventKitAccess { granted in
 
     // Start message watcher — KPI check-in state machine intercepts replies to
     // pending nightly check-ins; everything else goes straight to the brain.
-    let w = MessageWatcher(trustedSender: configManager.current.trustedSender) { rawMessage in
-        if let km = kpiManager, km.handlePendingResponse(rawMessage) {
+    let w = MessageWatcher(trustedSender: configManager.current.trustedSender) { rawMessage, attachments in
+        if attachments.isEmpty, let km = kpiManager, km.handlePendingResponse(rawMessage) {
             return
         }
-        brain.handle(rawMessage)
+        brain.handle(rawMessage, attachments: attachments)
     }
     watcher = w
     w.start()
@@ -190,7 +190,8 @@ requestEventKitAccess { granted in
         calendarAction: calendarAction,
         reminderAction: reminderAction,
         statusAction: statusAction,
-        systemAction: systemAction
+        systemAction: systemAction,
+        brain: brain
     )
     let webServer = WebServer(router: webRouter)
     webServer.start(host: configManager.current.webUIHost, port: configManager.current.webUIPort)
