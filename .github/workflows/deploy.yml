@@ -13,6 +13,10 @@ jobs:
           # Scratch path outside the repo so checkout's git clean doesn't wipe
           # incremental build state between deploys.
           swift build -c release --scratch-path /Users/nathanblatter/.natebot-scratch
+          # Brain workspace: persona/environment docs for the headless Claude
+          # Code sessions the daemon spawns. Lives outside the repo checkout.
+          mkdir -p /Users/nathanblatter/natebot-brain
+          cp brain/CLAUDE.md /Users/nathanblatter/natebot-brain/CLAUDE.md
           launchctl unload ~/Library/LaunchAgents/com.natebot.daemon.plist 2>/dev/null || true
           cp /Users/nathanblatter/.natebot-scratch/release/natebot /Users/nathanblatter/.local/bin/natebot
           launchctl load ~/Library/LaunchAgents/com.natebot.daemon.plist
