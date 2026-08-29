@@ -18,5 +18,9 @@ jobs:
           mkdir -p /Users/nathanblatter/natebot-brain
           cp brain/CLAUDE.md /Users/nathanblatter/natebot-brain/CLAUDE.md
           launchctl unload ~/Library/LaunchAgents/com.natebot.daemon.plist 2>/dev/null || true
-          cp /Users/nathanblatter/.natebot-scratch/release/natebot /Users/nathanblatter/.local/bin/natebot
+          # Replace by RENAME, never cp-over-in-place: cp reuses the inode and
+          # the kernel's cached code signature for that vnode goes stale — the
+          # next spawn dies instantly with OS_REASON_CODESIGNING (SIGKILL).
+          cp /Users/nathanblatter/.natebot-scratch/release/natebot /Users/nathanblatter/.local/bin/natebot.new
+          mv -f /Users/nathanblatter/.local/bin/natebot.new /Users/nathanblatter/.local/bin/natebot
           launchctl load ~/Library/LaunchAgents/com.natebot.daemon.plist
