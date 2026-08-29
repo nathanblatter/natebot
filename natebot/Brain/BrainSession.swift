@@ -46,13 +46,13 @@ final class BrainSession {
 
     // MARK: - Public
 
-    func handle(_ message: String) {
-        queue.async { self.run(message) }
+    func handle(_ message: String, attachments: [InboundAttachment] = []) {
+        queue.async { self.run(message, attachments: attachments) }
     }
 
     // MARK: - Turn execution
 
-    private func run(_ message: String) {
+    private func run(_ message: String, attachments: [InboundAttachment]) {
         let trimmed = message.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         if trimmed == "new session" || trimmed == "reset session" {
             sessionID = nil
@@ -61,6 +61,9 @@ final class BrainSession {
             log.append(from: "brain", message: message, action: "brain_reset", result: "ok", reply: "Fresh session")
             return
         }
+
+        let message = buildPrompt(text: message, attachments: attachments)
+        guard !message.isEmpty else { return }
 
         if let last = lastUsed, Date().timeIntervalSince(last) > sessionMaxAge {
             sessionID = nil
@@ -92,6 +95,86 @@ final class BrainSession {
         if text.count > 4000 { text = String(text.prefix(4000)) + "\n…(truncated)" }
         reply.send(text)
         log.append(from: "brain", message: message, action: "brain", result: "ok", reply: text)
+    }
+
+    // MARK: - Attachments
+
+    /// Assembles the prompt for one turn: voice messages are transcribed via
+    /// the mlx-whisper service, images are copied into the brain workspace's
+    /// inbox (out of ~/Library/Messages, so the spawned session can read them)
+    /// and referenced by path for the session to Read.
+    private func buildPrompt(text: String, attachments: [InboundAttachment]) -> String {
+        var parts: [String] = []
+
+        for att in attachments {
+            let ext = (att.path as NSString).pathExtension.lowercased()
+            let isAudio = att.mime.hasPrefix("audio/") || ["caf", "amr", "m4a", "mp3", "wav", "opus", "aac"].contains(ext)
+            let isImage = att.mime.hasPrefix("image/") || ["jpg", "jpeg", "png", "gif", "heic", "webp", "tiff"].contains(ext)
+
+            if isAudio {
+                if let transcript = transcribe(att.path), !transcript.isEmpty {
+                    parts.append("🎤 Voice message (transcribed): \(transcript)")
+                } else {
+                    parts.append("[A voice message arrived but transcription failed — tell Nathan.]")
+                }
+            } else if isImage {
+                if let inboxPath = copyToInbox(att.path) {
+                    parts.append("[Attached image: \(inboxPath) — use the Read tool to view it. If Read can't open the format, convert with `sips -s format jpeg` first.]")
+                }
+            } else if let inboxPath = copyToInbox(att.path) {
+                parts.append("[Attached file: \(inboxPath) (\(att.mime))]")
+            }
+        }
+
+        if !text.isEmpty { parts.append(text) }
+        return parts.joined(separator: "\n\n")
+    }
+
+    /// POSTs an audio file to the local mlx-whisper service. Returns nil if the
+    /// service is down or errors.
+    private func transcribe(_ path: String) -> String? {
+        let curl = Process()
+        curl.executableURL = URL(fileURLWithPath: "/usr/bin/curl")
+        curl.arguments = ["-s", "-m", "300", "-F", "file=@\(path)",
+                          "http://127.0.0.1:4310/transcribe"]
+        let pipe = Pipe()
+        curl.standardOutput = pipe
+        curl.standardError = Pipe()
+        do { try curl.run() } catch { return nil }
+        let data = pipe.fileHandleForReading.readDataToEndOfFile()
+        curl.waitUntilExit()
+        guard curl.terminationStatus == 0,
+              let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let transcript = obj["text"] as? String else { return nil }
+        return transcript.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    /// Copies an attachment into ~/natebot-brain/inbox and prunes old files.
+    private func copyToInbox(_ path: String) -> String? {
+        let inbox = "\(workspacePath)/inbox"
+        try? FileManager.default.createDirectory(atPath: inbox, withIntermediateDirectories: true)
+
+        // Prune inbox files older than 3 days
+        if let entries = try? FileManager.default.contentsOfDirectory(atPath: inbox) {
+            for entry in entries {
+                let p = "\(inbox)/\(entry)"
+                if let attrs = try? FileManager.default.attributesOfItem(atPath: p),
+                   let modified = attrs[.modificationDate] as? Date,
+                   Date().timeIntervalSince(modified) > 3 * 24 * 3600 {
+                    try? FileManager.default.removeItem(atPath: p)
+                }
+            }
+        }
+
+        let name = (path as NSString).lastPathComponent
+        let dest = "\(inbox)/\(UUID().uuidString.prefix(8))-\(name)"
+        do {
+            try FileManager.default.copyItem(atPath: path, toPath: dest)
+            return dest
+        } catch {
+            print("[Brain] Failed to copy attachment to inbox: \(error)")
+            return nil
+        }
     }
 
     private struct TurnOutcome {
