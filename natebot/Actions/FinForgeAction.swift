@@ -26,7 +26,7 @@ class FinForgeAction {
     // MARK: - Poll pending notifications (called by ProactiveMonitor)
 
     func pollPending(completion: @escaping () -> Void) {
-        get(path: "/pending") { [weak self] data in
+        get(path: "/natebot/pending") { [weak self] data in
             guard let self = self, let data = data,
                   let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                   let messages = json["messages"] as? [[String: Any]] else {
@@ -53,24 +53,24 @@ class FinForgeAction {
     // MARK: - On-demand fetches
 
     func briefing(completion: @escaping (String) -> Void) {
-        getText(path: "/imessage/briefing", fallback: "Could not fetch financial briefing.", completion: completion)
+        getText(path: "/natebot/imessage/briefing", fallback: "Could not fetch financial briefing.", completion: completion)
     }
 
     func portfolio(completion: @escaping (String) -> Void) {
-        getText(path: "/imessage/portfolio", fallback: "Could not fetch portfolio.", completion: completion)
+        getText(path: "/natebot/imessage/portfolio", fallback: "Could not fetch portfolio.", completion: completion)
     }
 
     func predict(symbol: String, completion: @escaping (String) -> Void) {
         let encoded = symbol.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? symbol
-        getText(path: "/imessage/predict/\(encoded)", fallback: "Could not fetch prediction.", completion: completion)
+        getText(path: "/natebot/imessage/predict/\(encoded)", fallback: "Could not fetch prediction.", completion: completion)
     }
 
     func goals(completion: @escaping (String) -> Void) {
-        getText(path: "/imessage/goals", fallback: "Could not fetch financial goals.", completion: completion)
+        getText(path: "/natebot/imessage/goals", fallback: "Could not fetch financial goals.", completion: completion)
     }
 
     func watchlist(completion: @escaping (String) -> Void) {
-        getText(path: "/imessage/watchlist", fallback: "Could not fetch watchlist.", completion: completion)
+        getText(path: "/natebot/imessage/watchlist", fallback: "Could not fetch watchlist.", completion: completion)
     }
 
     func chat(message: String, completion: @escaping (String) -> Void) {
