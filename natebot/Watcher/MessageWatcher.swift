@@ -66,9 +66,14 @@ class MessageWatcher {
         return db
     }
 
+    private var loggedInitFailure = false
+
     private func initializeLastRowID() {
         guard let db = openDB() else {
-            print("[MessageWatcher] Cannot open chat.db — check Full Disk Access in System Settings.")
+            if !loggedInitFailure {
+                print("[MessageWatcher] Cannot open chat.db yet — will keep retrying. If this persists, check Full Disk Access in System Settings.")
+                loggedInitFailure = true
+            }
             return
         }
         defer { sqlite3_close(db) }
@@ -86,6 +91,14 @@ class MessageWatcher {
     }
 
     private func poll() {
+        // If startup init failed (chat.db not yet readable — e.g. launchd started
+        // us before Full Disk Access / the disk was ready after a reboot), retry
+        // initialization instead of polling: polling with lastRowID = -1 would
+        // replay and reply to the entire message history.
+        if lastRowID < 0 {
+            initializeLastRowID()
+            return
+        }
         guard let db = openDB() else { return }
         defer { sqlite3_close(db) }
 

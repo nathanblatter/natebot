@@ -52,6 +52,8 @@ class KPIClient {
         // Try common psql paths (Homebrew ARM first on M-series)
         let candidates = [
             "/opt/homebrew/bin/psql",
+            "/opt/homebrew/opt/postgresql@17/bin/psql",  // keg-only Homebrew install (not linked into bin)
+            "/opt/homebrew/opt/libpq/bin/psql",
             "/usr/local/bin/psql",
             "/usr/bin/psql",
         ]
