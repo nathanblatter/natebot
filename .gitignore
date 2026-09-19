@@ -11,6 +11,7 @@ natebot/Resources/natebot.json
 .DS_Store
 
 # IDE
-.claude/
+/.claude/
+!brain/.claude/
 .idea/
 .vscode/

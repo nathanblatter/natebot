@@ -36,6 +36,7 @@ final output anyway (it is always delivered).
   - `GET /api/location/current`, `/api/location/history`
 - **KPIs**: Postgres `kpi` db at `localhost:5432` (`postgresql://postgres:postgres@localhost:5432/kpi`); dashboard at `:4200`. Log metrics by inserting/upserting the day's row; read it for status questions.
 - **Flightdeck** (project context layer): API/UI at `http://100.79.61.79:4300`. Read project state before working in a repo; log decisions/progress after.
+- **FinForge MCP** (`finforge` server, auto-connected via `.mcp.json`): read-only financial tools — briefing, portfolio, goals, watchlist, spending/transactions search, subscriptions, forecast, anomalies, charge-guardian. Prefer these over curling the FinForge REST API for money questions.
 - **Whisper transcription**: `POST http://127.0.0.1:4310/transcribe` (multipart `file=`) — mlx-whisper on the M4 GPU.
 - **Ollama** at `:11434` for quick local LLM jobs.
 - **Full machine access**: you can read/write files, run any command, use git, docker, gh.

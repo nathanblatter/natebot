@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "finforge": {
+      "type": "http",
+      "url": "http://100.79.61.79:4301/mcp"
+    }
+  }
+}

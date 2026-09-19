@@ -15,8 +15,10 @@ jobs:
           swift build -c release --scratch-path /Users/nathanblatter/.natebot-scratch
           # Brain workspace: persona/environment docs for the headless Claude
           # Code sessions the daemon spawns. Lives outside the repo checkout.
-          mkdir -p /Users/nathanblatter/natebot-brain
+          mkdir -p /Users/nathanblatter/natebot-brain/.claude
           cp brain/CLAUDE.md /Users/nathanblatter/natebot-brain/CLAUDE.md
+          cp brain/.mcp.json /Users/nathanblatter/natebot-brain/.mcp.json
+          cp brain/.claude/settings.json /Users/nathanblatter/natebot-brain/.claude/settings.json
           launchctl unload ~/Library/LaunchAgents/com.natebot.daemon.plist 2>/dev/null || true
           # Replace by RENAME, never cp-over-in-place: cp reuses the inode and
           # the kernel's cached code signature for that vnode goes stale — the
