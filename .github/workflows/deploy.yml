@@ -25,4 +25,15 @@ jobs:
           # next spawn dies instantly with OS_REASON_CODESIGNING (SIGKILL).
           cp /Users/nathanblatter/.natebot-scratch/release/natebot /Users/nathanblatter/.local/bin/natebot.new
           mv -f /Users/nathanblatter/.local/bin/natebot.new /Users/nathanblatter/.local/bin/natebot
+          # The binary is ad-hoc signed, so its cdhash changes every build. macOS
+          # TCC pins Calendar/Reminders/AppleEvents grants to a code requirement;
+          # if a grant was (re)approved via dialog it gets pinned to one cdhash
+          # and the next deploy hangs at boot waiting on EventKit. Rewrite the
+          # user-db grants to `identifier "natebot"` so they survive rebuilds.
+          # Best-effort: needs the runner to be able to read TCC.db.
+          sqlite3 "$HOME/Library/Application Support/com.apple.TCC/TCC.db" \
+            "update access set csreq=X'fade0c000000001c0000000100000002000000076e617465626f7400' \
+             where client='$HOME/.local/bin/natebot' \
+             and service in ('kTCCServiceCalendar','kTCCServiceReminders','kTCCServiceAppleEvents');" \
+            2>/dev/null || echo "TCC csreq normalization skipped (no access)"
           launchctl load ~/Library/LaunchAgents/com.natebot.daemon.plist
