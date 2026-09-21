@@ -12,6 +12,7 @@ class MorningBriefing {
     var locationTracker: LocationTracker?
     var finforgeAction: FinForgeAction?
     var kpiManager: KPIManager?
+    var canvasFeed: CanvasFeed?
     var timezoneManager: TimezoneManager?
 
     init(config: Config, store: EKEventStore, reply: ReplyAction, log: ActivityLog) {
@@ -209,6 +210,33 @@ class MorningBriefing {
             }
             sections.append("")
 
+            // CANVAS (school assignments from the Instructure feed)
+            var canvasToday: [CanvasAssignment] = []
+            var canvasUpcoming: [CanvasAssignment] = []
+            if let feed = self.canvasFeed {
+                canvasToday    = feed.due(on: Date()).filter { $0.due >= Date() }
+                canvasUpcoming = feed.upcoming(after: Date(), days: self.config.briefing.upcomingDays)
+                sections.append("🎓 CANVAS")
+                if canvasToday.isEmpty && canvasUpcoming.isEmpty {
+                    sections.append("  Nothing due")
+                } else {
+                    let tf = self.timezoneManager?.formatter(format: "h:mm a") ?? {
+                        let f = DateFormatter(); f.dateFormat = "h:mm a"; return f
+                    }()
+                    let dDf = self.timezoneManager?.formatter(format: "EEE MMM d") ?? {
+                        let f = DateFormatter(); f.dateFormat = "EEE MMM d"; return f
+                    }()
+                    for a in canvasToday {
+                        let when = a.allDay ? "today" : "today \(tf.string(from: a.due))"
+                        sections.append("  • \(a.title)\(a.course.map { " [\($0)]" } ?? "") — due \(when)")
+                    }
+                    for a in canvasUpcoming {
+                        sections.append("  • \(a.title)\(a.course.map { " [\($0)]" } ?? "") — \(dDf.string(from: a.due))")
+                    }
+                }
+                sections.append("")
+            }
+
             // UPCOMING ASSIGNMENTS
             sections.append("📋 UPCOMING ASSIGNMENTS")
             if upcomingReminders.isEmpty {
@@ -233,7 +261,9 @@ class MorningBriefing {
             let n3 = dueTodayReminders.count
             let n4 = upcomingReminders.count
             sections.append("—")
-            sections.append("\(n1) overdue · \(n2) events · \(n3) due today · \(n4) upcoming")
+            var footer = "\(n1) overdue · \(n2) events · \(n3) due today · \(n4) upcoming"
+            if self.canvasFeed != nil { footer += " · \(canvasToday.count + canvasUpcoming.count) canvas" }
+            sections.append(footer)
 
             completion(sections.joined(separator: "\n"))
         }

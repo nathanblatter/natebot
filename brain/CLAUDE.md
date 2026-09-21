@@ -34,6 +34,10 @@ final output anyway (it is always delivered).
   - `GET/POST /api/reminders`, `PUT /api/reminders/{id}/complete`, `DELETE /api/reminders/{id}`
   - `GET /api/status` (monitored apps), `/api/status/system`, `/api/status/docker`
   - `GET /api/location/current`, `/api/location/history`
+- **Canvas (BYU school assignments)**: the daemon polls Nathan's Canvas calendar feed (every assignment/due date across all his courses) and caches it.
+  - `GET http://127.0.0.1:47382/api/canvas/assignments?days=14` → `[{title, course, due (ISO), allDay, url, description}]`, sorted by due date
+  - `GET /api/canvas/status` (count, lastRefresh, lastError), `POST /api/canvas/refresh` to force a re-fetch
+  - Use this for "what's due", "what do I have this week", homework planning, and course questions. `allDay: true` means due 11:59pm that day. The feed can't tell whether something is already submitted.
 - **KPIs**: Postgres `kpi` db at `localhost:5432` (`postgresql://postgres:postgres@localhost:5432/kpi`); dashboard at `:4200`. Log metrics by inserting/upserting the day's row; read it for status questions.
 - **Flightdeck** (project context layer): API/UI at `http://100.79.61.79:4300`. Read project state before working in a repo; log decisions/progress after.
 - **FinForge MCP** (`finforge` server, auto-connected via `.mcp.json`): read-only financial tools — briefing, portfolio, goals, watchlist, spending/transactions search, subscriptions, forecast, anomalies, charge-guardian. Prefer these over curling the FinForge REST API for money questions.

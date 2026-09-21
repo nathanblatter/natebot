@@ -45,6 +45,11 @@
     "device": "iPhone",
     "named_locations": {}
   },
+  "canvas": {
+    "enabled": false,
+    "ics_url": "https://<school>.instructure.com/feeds/calendars/user_<token>.ics",
+    "refresh_minutes": 30
+  },
   "finforge": {
     "enabled": false,
     "api_url": "http://localhost:8001/api/v1",

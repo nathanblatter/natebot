@@ -13,6 +13,7 @@ final class WebRouter {
     private let statusAction: StatusAction
     private let systemAction: SystemAction
     private let brain: BrainSession
+    private let canvasFeed: CanvasFeed?
 
     typealias ResponseCallback = (_ statusCode: Int, _ headers: [(String, String)], _ body: Data) -> Void
 
@@ -24,7 +25,8 @@ final class WebRouter {
         reminderAction: ReminderAction,
         statusAction: StatusAction,
         systemAction: SystemAction,
-        brain: BrainSession
+        brain: BrainSession,
+        canvasFeed: CanvasFeed? = nil
     ) {
         self.configManager   = configManager
         self.log             = log
@@ -34,6 +36,7 @@ final class WebRouter {
         self.statusAction    = statusAction
         self.systemAction    = systemAction
         self.brain           = brain
+        self.canvasFeed      = canvasFeed
     }
 
     // MARK: - Dispatch
@@ -209,6 +212,27 @@ final class WebRouter {
             let eventId = String(path.dropFirst("/api/calendar/events/".count))
             calendarAction.deleteEvent(eventId: eventId) { success, msg in
                 if success { json(["status": "deleted"]) } else { errResp(msg, status: 404) }
+            }
+            return
+        }
+
+        // ── Canvas (school assignments from the Instructure .ics feed) ────────
+        if path == "/api/canvas/assignments" && method == .GET {
+            guard let feed = canvasFeed else { errResp("canvas feed not configured", status: 503); return }
+            let days = queryInt(query, key: "days") ?? 14
+            let tz = feed.timezoneManager?.currentTimezone ?? TimeZone.current
+            json(feed.upcoming(days: days).map { $0.toJSON(tz: tz) })
+            return
+        }
+        if path == "/api/canvas/status" && method == .GET {
+            guard let feed = canvasFeed else { errResp("canvas feed not configured", status: 503); return }
+            json(feed.statusJSON())
+            return
+        }
+        if path == "/api/canvas/refresh" && method == .POST {
+            guard let feed = canvasFeed else { errResp("canvas feed not configured", status: 503); return }
+            feed.refresh { err in
+                if let err = err { errResp(err, status: 502) } else { json(feed.statusJSON()) }
             }
             return
         }

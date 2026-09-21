@@ -111,6 +111,13 @@ if let kc = configManager.current.kpi, kc.enabled {
     print("[Boot] KPI tracking enabled — ingest at \(kc.apiUrl)")
 }
 
+// 6c. Canvas assignment feed (optional — enabled via canvas config)
+var canvasFeed: CanvasFeed? = nil
+if let cc = configManager.current.canvas, let feed = CanvasFeed(config: cc) {
+    canvasFeed = feed
+    print("[Boot] Canvas feed enabled — refreshing every \(cc.refreshMinutes ?? 30) min")
+}
+
 // 7. The brain — headless Claude Code session orchestrator
 let brain = BrainSession(apiKey: configManager.current.claudeApiKey, reply: replyAction, log: log)
 
@@ -163,6 +170,9 @@ requestEventKitAccess { granted in
     kpiManager?.timezoneManager = timezoneManager
     calendarAction.timezoneManager = timezoneManager
     reminderAction.timezoneManager = timezoneManager
+    canvasFeed?.timezoneManager = timezoneManager
+    morningBriefing.canvasFeed = canvasFeed
+    canvasFeed?.start()
 
     // Start proactive monitors
     proactiveMonitor.start()
@@ -191,7 +201,8 @@ requestEventKitAccess { granted in
         reminderAction: reminderAction,
         statusAction: statusAction,
         systemAction: systemAction,
-        brain: brain
+        brain: brain,
+        canvasFeed: canvasFeed
     )
     let webServer = WebServer(router: webRouter)
     webServer.start(host: configManager.current.webUIHost, port: configManager.current.webUIPort)

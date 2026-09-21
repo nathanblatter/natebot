@@ -18,6 +18,7 @@ struct Config: Codable {
     let locationTracking: LocationConfig?
     let finforge: FinForgeConfig?
     let kpi: KPIConfig?
+    let canvas: CanvasConfig?
     let webUIPort: Int
     let webUIHost: String
 
@@ -29,7 +30,7 @@ struct Config: Codable {
         case briefing, log, apps, monitors, calendars
         case reminderLists = "reminder_lists"
         case locationTracking = "location_tracking"
-        case finforge, kpi
+        case finforge, kpi, canvas
         case webUIPort = "webui_port"
         case webUIHost = "webui_host"
     }
@@ -49,6 +50,7 @@ struct Config: Codable {
         locationTracking = try c.decodeIfPresent(LocationConfig.self, forKey: .locationTracking)
         finforge      = try c.decodeIfPresent(FinForgeConfig.self, forKey: .finforge)
         kpi           = try c.decodeIfPresent(KPIConfig.self, forKey: .kpi)
+        canvas        = try c.decodeIfPresent(CanvasConfig.self, forKey: .canvas)
         webUIPort     = try c.decodeIfPresent(Int.self, forKey: .webUIPort) ?? 47382
         webUIHost     = try c.decodeIfPresent(String.self, forKey: .webUIHost) ?? "127.0.0.1"
     }
@@ -162,6 +164,18 @@ struct KPIConfig: Codable {
         case apiUrl = "api_url"
         case apiKey = "api_key"
         case dbUrl  = "db_url"
+    }
+}
+
+struct CanvasConfig: Codable {
+    let enabled: Bool
+    let icsUrl: String          // Canvas user calendar feed (embeds a per-user token — keep out of the repo)
+    let refreshMinutes: Int?    // default 30
+
+    enum CodingKeys: String, CodingKey {
+        case enabled
+        case icsUrl = "ics_url"
+        case refreshMinutes = "refresh_minutes"
     }
 }
 
