@@ -17,12 +17,18 @@ struct LocationEntry: Codable {
 class LocationTracker {
     private let dbURL: String
     private let device: String
-    private let namedLocations: [String: String]
+    /// Address-substring labels, longest substring first so the most specific
+    /// rule wins and resolution is deterministic.
+    private let namedLocations: [(substring: String, label: String)]
+    private let namedPlaces: [NamedPlace]
 
-    init(dbURL: String, device: String, namedLocations: [String: String]) {
+    init(dbURL: String, device: String, namedLocations: [String: String], namedPlaces: [NamedPlace] = []) {
         self.dbURL = dbURL
         self.device = device
         self.namedLocations = namedLocations
+            .map { (substring: $0.key.lowercased(), label: $0.value) }
+            .sorted { ($0.substring.count, $0.substring) > ($1.substring.count, $1.substring) }
+        self.namedPlaces = namedPlaces
     }
 
     // MARK: - Scheduling
@@ -138,12 +144,31 @@ class LocationTracker {
 
     // MARK: - Label Resolution
 
-    private func resolveLabel(for address: String) -> String? {
+    /// Coordinates first (nearest geofence containing the point), then the
+    /// address-substring rules as a fallback.
+    private func resolveLabel(for address: String, lat: Double, lon: Double) -> String? {
+        var best: (label: String, distance: Double)?
+        for place in namedPlaces {
+            let d = LocationTracker.distanceMeters(lat1: lat, lon1: lon, lat2: place.lat, lon2: place.lon)
+            guard d <= (place.radiusM ?? NamedPlace.defaultRadiusM) else { continue }
+            if best == nil || d < best!.distance { best = (place.label, d) }
+        }
+        if let best = best { return best.label }
+
         let lower = address.lowercased()
-        for (substring, label) in namedLocations {
-            if lower.contains(substring.lowercased()) { return label }
+        for rule in namedLocations where lower.contains(rule.substring) {
+            return rule.label
         }
         return nil
+    }
+
+    /// Great-circle (haversine) distance in metres.
+    static func distanceMeters(lat1: Double, lon1: Double, lat2: Double, lon2: Double) -> Double {
+        let r = 6_371_000.0
+        let p1 = lat1 * .pi / 180, p2 = lat2 * .pi / 180
+        let dp = p2 - p1, dl = (lon2 - lon1) * .pi / 180
+        let a = sin(dp / 2) * sin(dp / 2) + cos(p1) * cos(p2) * sin(dl / 2) * sin(dl / 2)
+        return 2 * r * asin(min(1, sqrt(a)))
     }
 
     // MARK: - Summary
@@ -198,7 +223,7 @@ class LocationTracker {
         let state    = cols.count > 6 ? cols[6] : ""
         let address  = buildAddress(street: street, city: city, state: state, resolved: resolved)
         guard !address.isEmpty else { return nil }
-        let label = resolveLabel(for: address)
+        let label = resolveLabel(for: address, lat: lat, lon: lon)
         return LocationEntry(device: device, address: address, label: label, latitude: lat, longitude: lon, timestamp: ts)
     }
 

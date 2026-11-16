@@ -93,7 +93,8 @@ if let locConfig = configManager.current.locationTracking, locConfig.enabled {
     locationTracker = LocationTracker(
         dbURL: configManager.current.kpi?.dbUrl ?? "",
         device: locConfig.device,
-        namedLocations: locConfig.namedLocations
+        namedLocations: locConfig.namedLocations,
+        namedPlaces: locConfig.namedPlaces ?? []
     )
 }
 

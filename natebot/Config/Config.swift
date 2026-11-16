@@ -182,12 +182,32 @@ struct CanvasConfig: Codable {
 struct LocationConfig: Codable {
     let enabled: Bool
     let device: String                    // e.g. "iPhone"
-    let namedLocations: [String: String]  // address substring → label
+    let namedLocations: [String: String]  // address substring → label (fallback)
+    let namedPlaces: [NamedPlace]?        // coordinate geofences — checked first
 
     enum CodingKeys: String, CodingKey {
         case enabled
         case device
         case namedLocations = "named_locations"
+        case namedPlaces = "named_places"
+    }
+}
+
+/// A labelled circle on the map. Coordinates are always present in
+/// location_log, while the reverse-geocoded street address drifts between
+/// neighbouring house numbers or is missing entirely — so geofences are the
+/// reliable way to tag a place.
+struct NamedPlace: Codable {
+    let label: String
+    let lat: Double
+    let lon: Double
+    let radiusM: Double?   // defaults to NamedPlace.defaultRadiusM
+
+    static let defaultRadiusM: Double = 120
+
+    enum CodingKeys: String, CodingKey {
+        case label, lat, lon
+        case radiusM = "radius_m"
     }
 }
 

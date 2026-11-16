@@ -43,7 +43,10 @@
   "location_tracking": {
     "enabled": false,
     "device": "iPhone",
-    "named_locations": {}
+    "named_locations": {},
+    "named_places": [
+      { "label": "Home", "lat": 0.0, "lon": 0.0, "radius_m": 80 }
+    ]
   },
   "canvas": {
     "enabled": false,

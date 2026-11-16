@@ -34,6 +34,7 @@ final output anyway (it is always delivered).
   - `GET/POST /api/reminders`, `PUT /api/reminders/{id}/complete`, `DELETE /api/reminders/{id}`
   - `GET /api/status` (monitored apps), `/api/status/system`, `/api/status/docker`
   - `GET /api/location/current`, `/api/location/history`
+  - History is per day: `/api/location/history?date=YYYY-MM-DD` (default today). Place labels come from `location_tracking` in `~/.config/natebot/natebot.json`: `named_places` (`{label, lat, lon, radius_m}` geofences, checked first — coordinates are always present) then `named_locations` (address substring → label). Labels apply retroactively but only load at daemon start, and restarting the daemon kills the session you are running in — text Nathan the result first.
 - **Canvas (BYU school assignments)**: the daemon polls Nathan's Canvas calendar feed (every assignment/due date across all his courses) and caches it.
   - `GET http://127.0.0.1:47382/api/canvas/assignments?days=14` → `[{title, course, due (ISO), allDay, url, description}]`, sorted by due date
   - `GET /api/canvas/status` (count, lastRefresh, lastError), `POST /api/canvas/refresh` to force a re-fetch
